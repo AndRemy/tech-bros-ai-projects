@@ -26,6 +26,11 @@ class SQLiteApartmentsRepository(ApartmentsRepository):
         conditions = []
         if filters.zona:
             conditions.append(self._table.c.zona == filters.zona)
+        # operacion/tipo son columnas opcionales; se filtran solo si existen en la tabla.
+        if filters.operacion and "operacion" in self._table.c:
+            conditions.append(self._table.c.operacion == filters.operacion)
+        if filters.tipo and "tipo" in self._table.c:
+            conditions.append(self._table.c.tipo == filters.tipo)
         if filters.precio_min is not None:
             conditions.append(self._table.c.precio >= filters.precio_min)
         if filters.precio_max is not None:
@@ -69,4 +74,6 @@ class SQLiteApartmentsRepository(ApartmentsRepository):
             fecha_publicacion=row["fecha_publicacion"],
             descripcion=row["descripcion"],
             url=row["url"],
+            operacion=row.get("operacion"),
+            tipo=row.get("tipo"),
         )

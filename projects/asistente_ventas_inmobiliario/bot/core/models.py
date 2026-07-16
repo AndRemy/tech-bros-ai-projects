@@ -16,6 +16,8 @@ class SortOption(str, Enum):
 
 class SearchFilters(BaseModel):
     zona: str | None = None
+    operacion: str | None = None  # "alquiler" | "venta"
+    tipo: str | None = None  # "departamento" | "casa"
     precio_min: float | None = None
     precio_max: float | None = None
     habitaciones: int | None = None
@@ -36,6 +38,8 @@ class ApartmentResult(BaseModel):
     fecha_publicacion: datetime
     descripcion: str
     url: str
+    operacion: str | None = None  # "alquiler" | "venta"
+    tipo: str | None = None  # "departamento" | "casa"
 
 
 class RankedResult(BaseModel):
