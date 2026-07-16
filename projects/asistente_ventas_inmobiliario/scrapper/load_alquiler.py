@@ -14,7 +14,7 @@ import sqlite3
 import hashlib
 from datetime import date
 
-DB = "data/real_estate.db"
+DB = "../data/real_estate.db"
 FECHA = "2026-07-15"
 
 # (zona_distrito, precio_S/, habitaciones, banos, area_m2, estac(0/1), badge, direccion, desc_corta)

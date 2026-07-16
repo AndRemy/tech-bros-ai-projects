@@ -8,7 +8,7 @@ Carga batch de CASAS EN ALQUILER (Urbania). Muchas de uso oficina/comercial.
 import sqlite3
 import hashlib
 
-DB = "data/real_estate.db"
+DB = "../data/real_estate.db"
 FECHA = "2026-07-15"
 
 # (zona, precio_S/, hab, ban, area, estac, badge, dir, desc)

@@ -7,9 +7,8 @@ def load_data():
     with open('resultados_finales.json', 'r', encoding='utf-8') as f:
         data = json.load(f)
 
-    # Conectar a la base de datos local
-    # Nota: Ajusta la ruta si es necesario. Basado en tu estructura es ./data/real_estate.db
-    conn = sqlite3.connect('./data/real_estate.db')
+    # Conectar a la base de datos local (projects/asistente_ventas_inmobiliario/data/real_estate.db)
+    conn = sqlite3.connect('../data/real_estate.db')
     cursor = conn.cursor()
 
     # Asegurar que la tabla existe según el esquema del repo (adaptado a sqlite)

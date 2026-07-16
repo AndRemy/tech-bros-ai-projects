@@ -37,7 +37,7 @@ class ApartmentResult(BaseModel):
     amenities: list[str] = []
     fecha_publicacion: datetime
     descripcion: str
-    url: str
+    url: str | None = None  # NULL en ~98% de las filas cargadas por los loaders manuales (load_*.py)
     operacion: str | None = None  # "alquiler" | "venta"
     tipo: str | None = None  # "departamento" | "casa"
 

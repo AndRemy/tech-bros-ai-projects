@@ -35,11 +35,13 @@ class AnthropicResponseGenerator(ResponseGenerator):
             )
 
         listing = "\n".join(
-            f"- {r.apartment.zona}, {r.apartment.habitaciones} hab, {r.apartment.banos} baños, "
+            f"- {r.apartment.tipo or 'inmueble'} en {r.apartment.operacion or 'operación no especificada'}, "
+            f"{r.apartment.zona}, {r.apartment.habitaciones} hab, {r.apartment.banos} baños, "
             f"{r.apartment.area_m2} m2, ${r.apartment.precio}, "
             f"amenities: {', '.join(r.apartment.amenities) or 'ninguna'}, "
             f"publicado: {r.apartment.fecha_publicacion.date()}, "
             f"descripción original: {r.apartment.descripcion}"
+            + (f", link: {r.apartment.url}" if r.apartment.url else "")
             for r in results
         )
         prompt = f"Pregunta del usuario: {query_text}\n\nDepartamentos encontrados:\n{listing}"

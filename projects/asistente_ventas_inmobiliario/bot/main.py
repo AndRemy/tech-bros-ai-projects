@@ -14,7 +14,7 @@ from .core.nlu import AnthropicIntentExtractor
 from .core.orchestrator import Orchestrator
 from .core.responder import AnthropicResponseGenerator
 from .core.session import InMemorySessionStore
-from .repository.apartments_repository import SQLiteApartmentsRepository
+from .repository.apartments_repository import PostgresApartmentsRepository
 
 logging.basicConfig(level=logging.INFO)
 
@@ -23,7 +23,7 @@ async def main() -> None:
     load_dotenv()
 
     llm_client = anthropic.AsyncAnthropic(api_key=os.environ["ANTHROPIC_API_KEY"])
-    repository = SQLiteApartmentsRepository(os.environ["DATABASE_URL"])
+    repository = PostgresApartmentsRepository(os.environ["DATABASE_URL"])
     session_store = InMemorySessionStore(ttl_seconds=int(os.environ.get("SESSION_TTL_SECONDS", 1800)))
 
     orchestrator = Orchestrator(

@@ -8,12 +8,13 @@ from ..core.exceptions import DatabaseUnavailableError
 from ..core.models import ApartmentResult, SearchFilters
 from ..core.repository import ApartmentsRepository
 
-# TODO: ajustar nombre de tabla y columnas cuando el equipo de datos confirme
-# el schema real de la base SQLite generada por el scrapper.
+# Schema confirmado contra la base Postgres (Neon) real: tabla `apartments` con
+# id, zona, precio, habitaciones, banos, area_m2, amenities, fecha_publicacion,
+# descripcion, url, operacion, tipo.
 _TABLE_NAME = "apartments"
 
 
-class SQLiteApartmentsRepository(ApartmentsRepository):
+class PostgresApartmentsRepository(ApartmentsRepository):
     def __init__(self, database_url: str) -> None:
         try:
             self._engine = create_engine(database_url)

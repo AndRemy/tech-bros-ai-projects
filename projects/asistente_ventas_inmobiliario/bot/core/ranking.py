@@ -10,6 +10,10 @@ def _relevance_score(apartment: ApartmentResult, filters: SearchFilters) -> floa
     score = 0.0
     if filters.zona and filters.zona.lower() == apartment.zona.lower():
         score += 1
+    if filters.operacion and filters.operacion == apartment.operacion:
+        score += 1
+    if filters.tipo and filters.tipo == apartment.tipo:
+        score += 1
     if filters.precio_max is not None and apartment.precio <= filters.precio_max:
         score += 1
     if filters.precio_min is not None and apartment.precio >= filters.precio_min:

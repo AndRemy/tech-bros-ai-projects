@@ -12,7 +12,7 @@ San Isidro, Barranco, Magdalena.
 import sqlite3
 import hashlib
 
-DB = "data/real_estate.db"
+DB = "../data/real_estate.db"
 FECHA = "2026-07-15"
 
 # (zona, precio_S/, hab, ban, area_m2, estac, badge, direccion, desc)
