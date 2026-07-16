@@ -47,6 +47,8 @@ _EXTRACT_TOOL = {
                 "type": "object",
                 "properties": {
                     "zona": {"type": ["string", "null"]},
+                    "operacion": {"type": ["string", "null"], "enum": ["alquiler", "venta", None]},
+                    "tipo": {"type": ["string", "null"], "enum": ["departamento", "casa", None]},
                     "precio_min": {"type": ["number", "null"]},
                     "precio_max": {"type": ["number", "null"]},
                     "habitaciones": {"type": ["integer", "null"]},
