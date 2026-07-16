@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import os
+
 from telegram import Update
 from telegram.ext import Application
 from telegram.ext import ContextTypes
@@ -33,3 +35,10 @@ class TelegramAdapter(ChannelAdapter):
 
     async def send(self, message: OutgoingMessage) -> None:
         await self._app.bot.send_message(chat_id=message.chat_id, text=message.text)
+
+
+def create_from_env() -> TelegramAdapter:
+    token = os.environ.get("TELEGRAM_BOT_TOKEN")
+    if not token:
+        raise RuntimeError("TELEGRAM_BOT_TOKEN no está configurado en .env")
+    return TelegramAdapter(token)

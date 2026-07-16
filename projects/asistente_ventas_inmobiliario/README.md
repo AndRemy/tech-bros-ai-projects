@@ -45,6 +45,12 @@ Decisiones de diseño relevantes:
   filtros extraídos coincide cada fila) y luego por fecha de publicación descendente. El
   usuario puede pedir otro orden o pedir la siguiente página; ambas cosas reutilizan la
   sesión activa en vez de iniciar una búsqueda nueva.
+- **Factory para elegir implementación según configuración.** `bot/repository/factory.py`
+  decide qué `ApartmentsRepository` instanciar según el esquema de `DATABASE_URL`;
+  `bot/adapters/factory.py` arma la lista de `ChannelAdapter` a partir de `ENABLED_CHANNELS`
+  en `.env`. En ambos casos `main.py` solo conoce la interfaz — agregar un backend de base de
+  datos o un canal nuevo es agregar una entrada al diccionario del factory correspondiente,
+  sin tocar el resto del bot.
 
 ## Estructura
 
@@ -54,8 +60,9 @@ asistente_ventas_inmobiliario/
 │   ├── main.py                      # entrypoint: arma las dependencias y arranca los adapters
 │   ├── adapters/                    # un adapter por canal, todos implementan ChannelAdapter
 │   │   ├── base.py
-│   │   ├── telegram_adapter.py
-│   │   └── discord_adapter.py
+│   │   ├── factory.py               # ENABLED_CHANNELS -> lista de ChannelAdapter
+│   │   ├── telegram_adapter.py      # expone create_from_env()
+│   │   └── discord_adapter.py       # expone create_from_env()
 │   ├── core/                        # lógica de negocio, sin dependencias de infraestructura
 │   │   ├── models.py
 │   │   ├── session.py
@@ -66,6 +73,7 @@ asistente_ventas_inmobiliario/
 │   │   ├── exceptions.py
 │   │   └── errors.py
 │   └── repository/
+│       ├── factory.py               # DATABASE_URL -> ApartmentsRepository concreto
 │       └── apartments_repository.py
 ├── scrapper/                        # extracción de listados desde Urbania.pe (Apify + Playwright)
 │   ├── orchestrator_apify.py        # recorre distritos/operaciones vía Apify -> resultados_finales.json
@@ -124,6 +132,10 @@ cp .env.example .env  # completar con credenciales reales
 ```
 
 ## Correr el bot
+
+Los canales activos se listan en `ENABLED_CHANNELS` dentro de `.env` (ej.
+`ENABLED_CHANNELS=telegram,discord`); el bot corre todos los que estén en esa lista al
+mismo tiempo, cada uno con su propio token (`TELEGRAM_BOT_TOKEN`, `DISCORD_BOT_TOKEN`, ...).
 
 ```bash
 python -m bot.main
