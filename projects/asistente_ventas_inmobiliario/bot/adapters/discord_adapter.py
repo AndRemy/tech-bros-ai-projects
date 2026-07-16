@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import os
+
 import discord
 
 from .base import Channel, ChannelAdapter, IncomingMessage, MessageHandler, OutgoingMessage
@@ -32,3 +34,10 @@ class DiscordAdapter(ChannelAdapter):
         channel = self._client.get_channel(int(message.chat_id))
         if channel is not None:
             await channel.send(message.text)
+
+
+def create_from_env() -> DiscordAdapter:
+    token = os.environ.get("DISCORD_BOT_TOKEN")
+    if not token:
+        raise RuntimeError("DISCORD_BOT_TOKEN no está configurado en .env")
+    return DiscordAdapter(token)

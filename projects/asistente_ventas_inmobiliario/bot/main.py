@@ -7,14 +7,12 @@ import os
 import anthropic
 from dotenv import load_dotenv
 
-from .adapters.base import ChannelAdapter
-from .adapters.discord_adapter import DiscordAdapter
-from .adapters.telegram_adapter import TelegramAdapter
+from .adapters.factory import create_channel_adapters
 from .core.nlu import AnthropicIntentExtractor
 from .core.orchestrator import Orchestrator
 from .core.responder import AnthropicResponseGenerator
 from .core.session import InMemorySessionStore
-from .repository.apartments_repository import PostgresApartmentsRepository
+from .repository.factory import create_apartments_repository
 
 logging.basicConfig(level=logging.INFO)
 
@@ -23,7 +21,7 @@ async def main() -> None:
     load_dotenv()
 
     llm_client = anthropic.AsyncAnthropic(api_key=os.environ["ANTHROPIC_API_KEY"])
-    repository = PostgresApartmentsRepository(os.environ["DATABASE_URL"])
+    repository = create_apartments_repository(os.environ["DATABASE_URL"])
     session_store = InMemorySessionStore(ttl_seconds=int(os.environ.get("SESSION_TTL_SECONDS", 1800)))
 
     orchestrator = Orchestrator(
@@ -33,14 +31,10 @@ async def main() -> None:
         session_store=session_store,
     )
 
-    adapters: list[ChannelAdapter] = []
-    if telegram_token := os.environ.get("TELEGRAM_BOT_TOKEN"):
-        adapters.append(TelegramAdapter(telegram_token))
-    if discord_token := os.environ.get("DISCORD_BOT_TOKEN"):
-        adapters.append(DiscordAdapter(discord_token))
-
-    if not adapters:
-        raise RuntimeError("Configura al menos TELEGRAM_BOT_TOKEN o DISCORD_BOT_TOKEN en .env")
+    enabled_channels = [c.strip() for c in os.environ.get("ENABLED_CHANNELS", "").split(",") if c.strip()]
+    if not enabled_channels:
+        raise RuntimeError("Configura ENABLED_CHANNELS en .env (ej. 'telegram,discord')")
+    adapters = create_channel_adapters(enabled_channels)
 
     await asyncio.gather(*(adapter.start(orchestrator.handle_message) for adapter in adapters))
 
