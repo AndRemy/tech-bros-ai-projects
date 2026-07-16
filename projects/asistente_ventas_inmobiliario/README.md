@@ -86,7 +86,7 @@ asistente_ventas_inmobiliario/
 │   ├── orchestrator.py              # variante propia con Playwright: crawler.py + urbania_scraper.py
 │   ├── load_to_db.py                # carga resultados_finales.json a la tabla `apartments`
 │   ├── load_*.py                    # cargas puntuales por lote (alquiler/venta, depto/casa)
-│   └── DESIGN.md, GEMINI.md         # notas de diseño y bitácora del equipo de scraping
+│   └── README.md                    # visión, contenido de la carpeta y cómo correrla
 ├── database/                        # esquema SQLModel (Property, DistrictStats) + engine
 │   ├── db.py
 │   └── models.py
