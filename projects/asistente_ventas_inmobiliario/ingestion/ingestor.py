@@ -1,10 +1,8 @@
-import os
 import logging
 from sqlmodel import Session, select
 from database.db import engine
 from database.models import Property, DistrictStats
 from scrapper.urbania_scraper import scrape_property_url
-from utils.helpers import calculate_price_m2
 
 logger = logging.getLogger(__name__)
 

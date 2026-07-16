@@ -50,13 +50,13 @@ Decisiones de diseño relevantes:
 
 ```
 asistente_ventas_inmobiliario/
-├── bot/
-│   ├── main.py                     # entrypoint: arma las dependencias y arranca los adapters
-│   ├── adapters/                   # un adapter por canal, todos implementan ChannelAdapter
+├── bot/                             # asistente conversacional
+│   ├── main.py                      # entrypoint: arma las dependencias y arranca los adapters
+│   ├── adapters/                    # un adapter por canal, todos implementan ChannelAdapter
 │   │   ├── base.py
 │   │   ├── telegram_adapter.py
 │   │   └── discord_adapter.py
-│   ├── core/                       # lógica de negocio, sin dependencias de infraestructura
+│   ├── core/                        # lógica de negocio, sin dependencias de infraestructura
 │   │   ├── models.py
 │   │   ├── session.py
 │   │   ├── nlu.py
@@ -67,27 +67,50 @@ asistente_ventas_inmobiliario/
 │   │   └── errors.py
 │   └── repository/
 │       └── apartments_repository.py
-├── database/                       # a cargo del equipo de scraping/datos
-├── scrapper/                       # a cargo del equipo de scraping/datos
+├── scrapper/                        # extracción de listados desde Urbania.pe (Apify + Playwright)
+│   ├── orchestrator_apify.py        # recorre distritos/operaciones vía Apify -> resultados_finales.json
+│   ├── orchestrator.py              # variante propia con Playwright: crawler.py + urbania_scraper.py
+│   ├── load_to_db.py                # carga resultados_finales.json a la tabla `apartments`
+│   ├── load_*.py                    # cargas puntuales por lote (alquiler/venta, depto/casa)
+│   └── DESIGN.md, GEMINI.md         # notas de diseño y bitácora del equipo de scraping
+├── database/                        # esquema SQLModel (Property, DistrictStats) + engine
+│   ├── db.py
+│   └── models.py
+├── ingestion/                       # ingesta on-demand: un link de Urbania -> fila en la base
+│   └── ingestor.py
+├── utils/                           # helpers compartidos por scrapper/database/ingestion
+│   └── helpers.py
+├── tests/
+│   └── test_core.py
+├── data/
+│   └── real_estate.db               # SQLite local
 ├── requirements.txt
 └── .env.example
 ```
 
 ## Estado actual / pendientes
 
-Este es el scaffolding de la arquitectura: interfaces y modelos están completos y
-tipados; las piezas que dependen de infraestructura externa están marcadas con `TODO`
-porque faltan detalles que no dependen de este equipo:
+El bot (`bot/`) ya está conectado y probado contra datos reales:
+`bot/repository/apartments_repository.py` (`PostgresApartmentsRepository`) lee la tabla
+`apartments` de un Postgres administrado en Neon — 654 filas confirmadas, con columnas
+`id, zona, precio, habitaciones, banos, area_m2, amenities, fecha_publicacion, descripcion,
+url, operacion, tipo`. Filtros, ranking y paginación fueron verificados end-to-end contra esa
+base (sin mockear el schema).
 
-- **Schema de la base de datos**: `ApartmentsRepository` asume una tabla `apartments` con
-  columnas razonables (`zona`, `precio`, `habitaciones`, `fecha_publicacion`, ...). Hay que
-  ajustar `bot/repository/apartments_repository.py` cuando el equipo de datos confirme el
-  schema real y la cadena de conexión a la base SQLite en la nube.
+Pendientes conocidos:
+
+- **`url` es NULL en ~98% de las filas** (644/654) — son las cargadas por los loaders
+  manuales (`scrapper/load_*.py`), que pegan listados sin URL real; solo las filas cargadas
+  vía Apify (`load_to_db.py`) tienen `url`. Ya está modelado como opcional en
+  `bot/core/models.py`; el bot simplemente omite el link cuando no existe.
+- **El pipeline de ingesta on-demand (`ingestion/ingestor.py` + `database/db.py`) no escribe
+  a la misma base que usa el bot.** Usa SQLModel contra `data/real_estate.db` (SQLite local)
+  con tablas `Property`/`DistrictStats`, un esquema distinto al `apartments` de Postgres. Si
+  se quiere que la ingesta on-demand alimente al bot, hay que decidir si conviene apuntarla a
+  Postgres y al esquema `apartments`, o mantenerla como un pipeline aparte.
 - **Credenciales de Telegram/Discord**: los adapters están escritos contra las interfaces
   de `python-telegram-bot` y `discord.py`, pero necesitan un bot token para correr.
-- **Proveedor de LLM**: `nlu.py` y `responder.py` dependen de una interfaz `LLMClient`
-  (`bot/core/nlu.py`); falta decidir y cablear el proveedor (Anthropic, OpenAI, etc.) y su
-  API key.
+- **Proveedor de LLM**: `nlu.py` y `responder.py` del bot llaman a Anthropic; falta la API key.
 
 ## Instalación
 
@@ -96,6 +119,7 @@ cd projects/asistente_ventas_inmobiliario
 python -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
+playwright install chromium  # solo si vas a correr scrapper/crawler.py o urbania_scraper.py
 cp .env.example .env  # completar con credenciales reales
 ```
 
@@ -103,4 +127,24 @@ cp .env.example .env  # completar con credenciales reales
 
 ```bash
 python -m bot.main
+```
+
+## Correr el pipeline de scraping / ETL
+
+Los scripts de `scrapper/`, `database/`, `ingestion/` y `tests/` asumen que se ejecutan
+con el directorio de trabajo en la raíz del proyecto (`projects/asistente_ventas_inmobiliario/`),
+igual que el bot, para que los imports (`from database.db import ...`, `from scrapper...`,
+`from utils.helpers import ...`) resuelvan correctamente:
+
+```bash
+cd projects/asistente_ventas_inmobiliario
+
+# Extracción vía Apify (requiere APIFY_API_TOKEN en .env) + carga a `apartments`
+cd scrapper && python orchestrator_apify.py && python load_to_db.py && cd ..
+
+# Ingesta on-demand de un link individual (usa database/ + tablas Property/DistrictStats)
+python -c "from ingestion.ingestor import ingest_property_link; ingest_property_link('https://urbania.pe/...')"
+
+# Tests
+pytest tests/
 ```
