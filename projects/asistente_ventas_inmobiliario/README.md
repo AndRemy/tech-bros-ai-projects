@@ -48,9 +48,10 @@ Decisiones de diseño relevantes:
 - **Factory para elegir implementación según configuración.** `bot/repository/factory.py`
   decide qué `ApartmentsRepository` instanciar según el esquema de `DATABASE_URL`;
   `bot/adapters/factory.py` arma la lista de `ChannelAdapter` a partir de `ENABLED_CHANNELS`
-  en `.env`. En ambos casos `main.py` solo conoce la interfaz — agregar un backend de base de
-  datos o un canal nuevo es agregar una entrada al diccionario del factory correspondiente,
-  sin tocar el resto del bot.
+  en `.env`; `bot/llm/factory.py` decide qué proveedor de LLM (`IntentExtractor` +
+  `ResponseGenerator`) usar según `LLM_PROVIDER`. En los tres casos `main.py` solo conoce la
+  interfaz — agregar un backend de base de datos, un canal o un proveedor de LLM nuevo es
+  agregar una entrada al diccionario del factory correspondiente, sin tocar el resto del bot.
 
 ## Estructura
 
@@ -66,12 +67,17 @@ asistente_ventas_inmobiliario/
 │   ├── core/                        # lógica de negocio, sin dependencias de infraestructura
 │   │   ├── models.py
 │   │   ├── session.py
-│   │   ├── nlu.py
+│   │   ├── nlu.py                   # puerto IntentExtractor (sin SDK de ningún proveedor)
 │   │   ├── ranking.py
-│   │   ├── responder.py
+│   │   ├── responder.py             # puerto ResponseGenerator + build_prompt compartido
 │   │   ├── orchestrator.py
 │   │   ├── exceptions.py
 │   │   └── errors.py
+│   ├── llm/                         # un archivo por proveedor de LLM
+│   │   ├── factory.py               # LLM_PROVIDER -> (IntentExtractor, ResponseGenerator)
+│   │   ├── anthropic_provider.py    # expone create_intent_extractor_from_env() / create_response_generator_from_env()
+│   │   ├── openai_provider.py
+│   │   └── gemini_provider.py
 │   └── repository/
 │       ├── factory.py               # DATABASE_URL -> ApartmentsRepository concreto
 │       └── apartments_repository.py
@@ -118,7 +124,14 @@ Pendientes conocidos:
   Postgres y al esquema `apartments`, o mantenerla como un pipeline aparte.
 - **Credenciales de Telegram/Discord**: los adapters están escritos contra las interfaces
   de `python-telegram-bot` y `discord.py`, pero necesitan un bot token para correr.
-- **Proveedor de LLM**: `nlu.py` y `responder.py` del bot llaman a Anthropic; falta la API key.
+- **Proveedor de LLM**: `bot/llm/` soporta Anthropic, OpenAI y Gemini (`LLM_PROVIDER` en
+  `.env`) — falta la API key del que vayan a usar. **Ninguno de los tres se probó todavía
+  contra una API real** (no había ninguna key disponible en esta sesión); las tres
+  implementaciones están escritas y validadas contra la documentación/SDK de cada proveedor
+  (construcción de clientes, forma de las respuestas), pero conviene probar cada una con una
+  pregunta simple antes de confiar en ellas en producción. Nota: el SDK `google-generativeai`
+  está deprecado (el propio paquete lo advierte al importarlo) — `gemini_provider.py` ya usa
+  el reemplazo oficial, `google-genai`.
 
 ## Instalación
 
@@ -136,6 +149,8 @@ cp .env.example .env  # completar con credenciales reales
 Los canales activos se listan en `ENABLED_CHANNELS` dentro de `.env` (ej.
 `ENABLED_CHANNELS=telegram,discord`); el bot corre todos los que estén en esa lista al
 mismo tiempo, cada uno con su propio token (`TELEGRAM_BOT_TOKEN`, `DISCORD_BOT_TOKEN`, ...).
+El proveedor de LLM se elige con `LLM_PROVIDER=anthropic|openai|gemini`; solo hace falta la
+API key de ese proveedor (`ANTHROPIC_API_KEY`, `OPENAI_API_KEY` o `GEMINI_API_KEY`).
 
 ```bash
 python -m bot.main
