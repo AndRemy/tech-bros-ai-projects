@@ -9,7 +9,7 @@ def _relevance_score(apartment: ApartmentResult, filters: SearchFilters) -> floa
     Aproximación determinista de "qué tanto se acomoda a la descripción" sin
     necesitar búsqueda semántica/embeddings sobre la base SQLite actual."""
     score = 0.0
-    if filters.zona and filters.zona.lower() == apartment.zona.lower():
+    if filters.zonas and apartment.zona.lower() in {z.lower() for z in filters.zonas}:
         score += 1
     if filters.operacion and filters.operacion == apartment.operacion:
         score += 1

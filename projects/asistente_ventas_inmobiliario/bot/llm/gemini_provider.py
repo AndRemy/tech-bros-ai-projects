@@ -36,7 +36,11 @@ _EXTRACT_TOOL = types.Tool(
                     "filters": {
                         "type": "object",
                         "properties": {
-                            "zona": {"type": ["string", "null"]},
+                            "zonas": {
+                                "type": "array",
+                                "items": {"type": "string"},
+                                "description": "Una o más zonas/distritos; cualquiera de ellas es un match válido (OR).",
+                            },
                             "operacion": {"type": ["string", "null"], "enum": ["alquiler", "venta", None]},
                             "tipo": {"type": ["string", "null"], "enum": ["departamento", "casa", None]},
                             "precio_min": {"type": ["number", "null"]},
