@@ -95,7 +95,10 @@ class Orchestrator:
             return session.filters, session.offset + self._page_size
 
         if extracted.intent == Intent.CHANGE_SORT and extracted.filters is not None:
-            updated_filters = session.filters.model_copy(update={"sort": extracted.filters.sort})
-            return updated_filters, 0
+            # El NLU ya recibe los filtros activos de la sesión como contexto y
+            # devuelve el set combinado (no solo el campo sort) — usarlo tal cual
+            # en vez de reconstruirlo evita descartar cambios de zona/precio/etc.
+            # que el usuario haya mencionado junto con el reordenamiento.
+            return extracted.filters, 0
 
         return session.filters, session.offset
