@@ -40,6 +40,10 @@ _EXTRACT_TOOL = {
                         "banos": {"type": ["integer", "null"]},
                         "area_min_m2": {"type": ["number", "null"]},
                         "amenities": {"type": "array", "items": {"type": "string"}},
+                        "direccion": {
+                            "type": ["string", "null"],
+                            "description": "Calle, avenida o dirección mencionada por el usuario, si la hay.",
+                        },
                         "sort": {"type": "string", "enum": [s.value for s in SortOption]},
                     },
                 },

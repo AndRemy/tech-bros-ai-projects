@@ -24,6 +24,9 @@ class SearchFilters(BaseModel):
     banos: int | None = None
     area_min_m2: float | None = None
     amenities: list[str] = []
+    # No hay columna de dirección en la tabla; se busca como substring dentro
+    # de descripcion (ILIKE), donde el scraper suele incluir la calle/avenida.
+    direccion: str | None = None
     sort: SortOption = SortOption.RELEVANCE
 
 

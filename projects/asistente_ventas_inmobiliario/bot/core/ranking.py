@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from .models import ApartmentResult, RankedResult, SearchFilters, SortOption
+from .text_utils import strip_accents
 
 
 def _relevance_score(apartment: ApartmentResult, filters: SearchFilters) -> float:
@@ -27,6 +28,8 @@ def _relevance_score(apartment: ApartmentResult, filters: SearchFilters) -> floa
     if filters.amenities:
         matched = {a.lower() for a in filters.amenities} & {a.lower() for a in apartment.amenities}
         score += len(matched)
+    if filters.direccion and strip_accents(filters.direccion.lower()) in strip_accents(apartment.descripcion.lower()):
+        score += 1
     return score
 
 
