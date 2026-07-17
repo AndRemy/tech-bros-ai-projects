@@ -15,7 +15,13 @@ class DiscordAdapter(ChannelAdapter):
         self._client = discord.Client(intents=intents)
 
     async def start(self, on_message: MessageHandler) -> None:
-        async def handle_discord_message(discord_message: discord.Message) -> None:
+        # discord.Client (a diferencia de commands.Bot) no tiene add_listener; su
+        # decorador event() registra la corrutina por nombre (coro.__name__), así
+        # que el handler de abajo debe llamarse literalmente "on_message". Por eso
+        # guardamos el callback original en otra variable antes de shadowearlo.
+        handle_message = on_message
+
+        async def on_message(discord_message: discord.Message) -> None:
             if discord_message.author.bot:
                 return
             incoming = IncomingMessage(
@@ -24,10 +30,10 @@ class DiscordAdapter(ChannelAdapter):
                 chat_id=str(discord_message.channel.id),
                 text=discord_message.content,
             )
-            outgoing = await on_message(incoming)
+            outgoing = await handle_message(incoming)
             await discord_message.channel.send(outgoing.text)
 
-        self._client.add_listener(handle_discord_message, "on_message")
+        self._client.event(on_message)
         await self._client.start(self._token)
 
     async def send(self, message: OutgoingMessage) -> None:

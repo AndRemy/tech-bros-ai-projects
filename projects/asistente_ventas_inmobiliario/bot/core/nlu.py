@@ -35,7 +35,14 @@ class IntentExtractor(ABC):
 EXTRACT_TOOL_NAME = "extract_search_intent"
 EXTRACT_TOOL_DESCRIPTION = (
     "Extrae la intención y los filtros de búsqueda de departamentos a partir del "
-    "mensaje del usuario y, si existe, de la búsqueda activa en la sesión."
+    "mensaje del usuario y, si existe, de la búsqueda activa en la sesión. "
+    "Usa new_search si el usuario menciona una zona, precio, tipo de operación u "
+    "otro criterio nuevo o distinto al de la sesión activa, incluso si ya había una "
+    "búsqueda en curso. Usa change_sort únicamente cuando pide reordenar los mismos "
+    "resultados (ej. 'ordénalos por precio') sin cambiar ningún criterio de "
+    "búsqueda. Usa next_page cuando pide ver más resultados de la misma búsqueda. "
+    "En todos los casos donde devuelvas filters, combina los criterios de la "
+    "sesión activa con lo que el usuario acaba de pedir."
 )
 
 

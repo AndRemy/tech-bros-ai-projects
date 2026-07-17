@@ -26,12 +26,15 @@ class PostgresApartmentsRepository(ApartmentsRepository):
     def search(self, filters: SearchFilters, offset: int, limit: int) -> tuple[list[ApartmentResult], bool]:
         conditions = []
         if filters.zona:
-            conditions.append(self._table.c.zona == filters.zona)
+            # ilike (case-insensitive) porque el NLU no siempre normaliza la
+            # capitalización tal como está en la base (ej. "san Borja" vs
+            # "San Borja" no matcheaban con ==, aunque sí había datos).
+            conditions.append(self._table.c.zona.ilike(filters.zona))
         # operacion/tipo son columnas opcionales; se filtran solo si existen en la tabla.
         if filters.operacion and "operacion" in self._table.c:
-            conditions.append(self._table.c.operacion == filters.operacion)
+            conditions.append(self._table.c.operacion.ilike(filters.operacion))
         if filters.tipo and "tipo" in self._table.c:
-            conditions.append(self._table.c.tipo == filters.tipo)
+            conditions.append(self._table.c.tipo.ilike(filters.tipo))
         if filters.precio_min is not None:
             conditions.append(self._table.c.precio >= filters.precio_min)
         if filters.precio_max is not None:
