@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from sqlalchemy import MetaData, Table, and_, create_engine, select
+from sqlalchemy import MetaData, Table, and_, create_engine, or_, select
 from sqlalchemy.engine import RowMapping
 from sqlalchemy.exc import SQLAlchemyError
 
@@ -26,13 +26,17 @@ class PostgresApartmentsRepository(ApartmentsRepository):
 
     def search(self, filters: SearchFilters, offset: int, limit: int) -> tuple[list[ApartmentResult], bool]:
         conditions = []
-        if filters.zona:
+        if filters.zonas:
             # ilike (case-insensitive) porque el NLU no siempre normaliza la
             # capitalización tal como está en la base (ej. "san Borja" vs
             # "San Borja" no matcheaban con ==, aunque sí había datos). También
             # sin tildes: distritos como "Jesus Maria" están así en la base,
             # pero el LLM suele escribirlos con ortografía correcta ("Jesús").
-            conditions.append(self._table.c.zona.ilike(strip_accents(filters.zona)))
+            # OR entre zonas: el usuario puede pedir varias alternativas
+            # ("Barranco o San Isidro"), cualquiera de ellas es un match válido.
+            conditions.append(
+                or_(*(self._table.c.zona.ilike(strip_accents(zona)) for zona in filters.zonas))
+            )
         # operacion/tipo son columnas opcionales; se filtran solo si existen en la tabla.
         if filters.operacion and "operacion" in self._table.c:
             conditions.append(self._table.c.operacion.ilike(filters.operacion))

@@ -15,7 +15,9 @@ class SortOption(str, Enum):
 
 
 class SearchFilters(BaseModel):
-    zona: str | None = None
+    # Lista porque el usuario puede pedir varias zonas alternativas ("Barranco
+    # o San Isidro"); un match contra cualquiera de ellas es suficiente (OR).
+    zonas: list[str] = []
     operacion: str | None = None  # "alquiler" | "venta"
     tipo: str | None = None  # "departamento" | "casa"
     precio_min: float | None = None
