@@ -8,7 +8,10 @@ SYSTEM_PROMPT = (
     "Eres un asistente de ventas inmobiliario. Recibes una lista de departamentos "
     "y debes redactar, para cada uno, una descripción de 2 a 3 oraciones en "
     "español, en tono cercano y profesional, resaltando lo que mejor calce con lo "
-    "que pidió el usuario. No inventes datos que no estén en la lista."
+    "que pidió el usuario. No inventes datos que no estén en la lista. Todos los "
+    "montos están en soles peruanos (PEN) y ya vienen formateados como 'S/ <monto>' "
+    "con separador de miles (ej. 'S/ 2,088,000'); cópialos tal cual aparecen en la "
+    "lista, sin quitar las comas ni cambiar el símbolo por '$'."
 )
 
 NO_RESULTS_MESSAGE = (
@@ -25,6 +28,10 @@ class ResponseGenerator(ABC):
     async def generate(self, query_text: str, results: list[RankedResult], has_more: bool) -> str: ...
 
 
+def _format_price(precio: float) -> str:
+    return f"S/ {precio:,.0f}"
+
+
 def build_prompt(query_text: str, results: list[RankedResult], has_more: bool) -> str | None:
     """Arma el prompt de usuario para el LLM. None si no hay resultados: ahí el
     ResponseGenerator debe devolver NO_RESULTS_MESSAGE directo, sin llamar al LLM."""
@@ -34,7 +41,7 @@ def build_prompt(query_text: str, results: list[RankedResult], has_more: bool) -
     listing = "\n".join(
         f"- {r.apartment.tipo or 'inmueble'} en {r.apartment.operacion or 'operación no especificada'}, "
         f"{r.apartment.zona}, {r.apartment.habitaciones} hab, {r.apartment.banos} baños, "
-        f"{r.apartment.area_m2} m2, ${r.apartment.precio}, "
+        f"{r.apartment.area_m2} m2, {_format_price(r.apartment.precio)}, "
         f"amenities: {', '.join(r.apartment.amenities) or 'ninguna'}, "
         f"publicado: {r.apartment.fecha_publicacion.date()}, "
         f"descripción original: {r.apartment.descripcion}"

@@ -7,6 +7,7 @@ from sqlalchemy.exc import SQLAlchemyError
 from ..core.exceptions import DatabaseUnavailableError
 from ..core.models import ApartmentResult, SearchFilters
 from ..core.repository import ApartmentsRepository
+from ..core.text_utils import strip_accents
 
 # Schema confirmado contra la base Postgres (Neon) real: tabla `apartments` con
 # id, zona, precio, habitaciones, banos, area_m2, amenities, fecha_publicacion,
@@ -28,8 +29,10 @@ class PostgresApartmentsRepository(ApartmentsRepository):
         if filters.zona:
             # ilike (case-insensitive) porque el NLU no siempre normaliza la
             # capitalización tal como está en la base (ej. "san Borja" vs
-            # "San Borja" no matcheaban con ==, aunque sí había datos).
-            conditions.append(self._table.c.zona.ilike(filters.zona))
+            # "San Borja" no matcheaban con ==, aunque sí había datos). También
+            # sin tildes: distritos como "Jesus Maria" están así en la base,
+            # pero el LLM suele escribirlos con ortografía correcta ("Jesús").
+            conditions.append(self._table.c.zona.ilike(strip_accents(filters.zona)))
         # operacion/tipo son columnas opcionales; se filtran solo si existen en la tabla.
         if filters.operacion and "operacion" in self._table.c:
             conditions.append(self._table.c.operacion.ilike(filters.operacion))
@@ -45,6 +48,12 @@ class PostgresApartmentsRepository(ApartmentsRepository):
             conditions.append(self._table.c.banos == filters.banos)
         if filters.area_min_m2 is not None:
             conditions.append(self._table.c.area_m2 >= filters.area_min_m2)
+        if filters.direccion:
+            # No hay columna de dirección; se busca como substring dentro de
+            # descripcion, donde el scraper suele incluir la calle/avenida.
+            sin_tildes = strip_accents(filters.direccion)
+            escaped = sin_tildes.replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_")
+            conditions.append(self._table.c.descripcion.ilike(f"%{escaped}%", escape="\\"))
 
         # Se pide un resultado extra (limit + 1) para saber si hay página
         # siguiente sin hacer un COUNT(*) aparte.
