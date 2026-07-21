@@ -19,7 +19,10 @@ from ..core.nlu import (
 from ..core.responder import NO_RESULTS_MESSAGE, SYSTEM_PROMPT, ResponseGenerator, build_prompt
 from ..core.session import ConversationSession
 
-_MODEL_NAME = "gemini-2.0-flash"
+# Alias que Google mantiene apuntando al modelo flash vigente, en vez de una
+# versión fija (gemini-2.0-flash y luego gemini-2.5-flash quedaron
+# descontinuadas en el tiempo que duró esta sesión de pruebas).
+_MODEL_NAME = "gemini-flash-latest"
 
 # parameters_json_schema acepta JSON Schema estándar (a diferencia de `parameters`,
 # que espera el subconjunto OpenAPI propio del SDK) -- mismo shape que usamos para
