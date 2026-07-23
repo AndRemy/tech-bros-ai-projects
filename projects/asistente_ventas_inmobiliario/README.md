@@ -272,3 +272,4 @@ Qué haría falta para mitigarlo, en orden de prioridad:
   enviarla.
 - **Red-teaming**: probar payloads de jailbreak conocidos, tanto como mensaje de usuario como
   metidos en una `descripcion` de prueba, antes y después de cualquier mitigación.
+
