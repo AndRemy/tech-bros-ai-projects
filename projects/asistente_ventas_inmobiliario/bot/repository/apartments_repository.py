@@ -15,6 +15,10 @@ from ..core.text_utils import strip_accents
 _TABLE_NAME = "apartments"
 
 
+def _escape_like(text: str) -> str:
+    return text.replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_")
+
+
 class PostgresApartmentsRepository(ApartmentsRepository):
     def __init__(self, database_url: str) -> None:
         try:
@@ -27,15 +31,14 @@ class PostgresApartmentsRepository(ApartmentsRepository):
     def search(self, filters: SearchFilters, offset: int, limit: int) -> tuple[list[ApartmentResult], bool]:
         conditions = []
         if filters.zonas:
-            # ilike (case-insensitive) porque el NLU no siempre normaliza la
-            # capitalización tal como está en la base (ej. "san Borja" vs
-            # "San Borja" no matcheaban con ==, aunque sí había datos). También
-            # sin tildes: distritos como "Jesus Maria" están así en la base,
-            # pero el LLM suele escribirlos con ortografía correcta ("Jesús").
-            # OR entre zonas: el usuario puede pedir varias alternativas
-            # ("Barranco o San Isidro"), cualquiera de ellas es un match válido.
+            # ilike con comodines (case/tilde-insensitive) porque el NLU suele
+            # extraer la forma coloquial que usó el usuario, no el nombre
+            # completo tal como está en la base — ej. "Surco" en vez de
+            # "Santiago de Surco" (con igualdad exacta, cero resultados aunque
+            # sí había datos). OR entre zonas: el usuario puede pedir varias
+            # alternativas ("Barranco o San Isidro"), cualquiera es un match válido.
             conditions.append(
-                or_(*(self._table.c.zona.ilike(strip_accents(zona)) for zona in filters.zonas))
+                or_(*(self._table.c.zona.ilike(f"%{_escape_like(strip_accents(z))}%", escape="\\") for z in filters.zonas))
             )
         # operacion/tipo son columnas opcionales; se filtran solo si existen en la tabla.
         if filters.operacion and "operacion" in self._table.c:
@@ -55,8 +58,7 @@ class PostgresApartmentsRepository(ApartmentsRepository):
         if filters.direccion:
             # No hay columna de dirección; se busca como substring dentro de
             # descripcion, donde el scraper suele incluir la calle/avenida.
-            sin_tildes = strip_accents(filters.direccion)
-            escaped = sin_tildes.replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_")
+            escaped = _escape_like(strip_accents(filters.direccion))
             conditions.append(self._table.c.descripcion.ilike(f"%{escaped}%", escape="\\"))
 
         # Se pide un resultado extra (limit + 1) para saber si hay página
