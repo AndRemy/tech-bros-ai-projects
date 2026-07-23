@@ -39,7 +39,7 @@ Construimos una demo de agente de IA inmobiliario para averiguarlo.
 - **Resiliente**: los errores se responden con mensajes de plantilla fija —
   el bot sigue contestando aunque el proveedor de LLM esté caído.
 
-## Dos LLM, cero SQL generado por IA
+## División de responsabilidades: LLM vs. código determinista
 
 | Etapa     | ¿LLM o código? | Qué produce                                  |
 |-----------|----------------|----------------------------------------------|
