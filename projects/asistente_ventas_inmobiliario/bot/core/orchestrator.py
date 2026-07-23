@@ -5,12 +5,13 @@ import uuid
 
 from ..adapters.base import IncomingMessage, OutgoingMessage
 from .errors import to_user_friendly_message
-from .exceptions import BotError
-from .models import SearchFilters
+from .exceptions import BotError, LLMProviderError
+from .features import FeatureExtractor
+from .message_formatter import NO_RESULTS_MESSAGE, format_search_results
+from .models import RankedResult, SearchFilters
 from .nlu import ExtractedIntent, Intent, IntentExtractor
 from .ranking import rank
 from .repository import ApartmentsRepository
-from .responder import ResponseGenerator
 from .session import ConversationSession, SessionStore
 
 logger = logging.getLogger(__name__)
@@ -24,20 +25,20 @@ _NO_ACTIVE_SEARCH_MESSAGE = "No tengo una búsqueda activa para continuar. Cuén
 
 class Orchestrator:
     """Coordina el pipeline completo: NLU -> filtros -> repository -> ranking ->
-    responder, y el estado de conversación entre turnos. Es el único componente
-    que conoce el pipeline de punta a punta."""
+    extracción de características -> formato, y el estado de conversación entre
+    turnos. Es el único componente que conoce el pipeline de punta a punta."""
 
     def __init__(
         self,
         intent_extractor: IntentExtractor,
         repository: ApartmentsRepository,
-        responder: ResponseGenerator,
+        feature_extractor: FeatureExtractor,
         session_store: SessionStore,
         page_size: int = 3,
     ) -> None:
         self._intent_extractor = intent_extractor
         self._repository = repository
-        self._responder = responder
+        self._feature_extractor = feature_extractor
         self._session_store = session_store
         self._page_size = page_size
 
@@ -79,8 +80,20 @@ class Orchestrator:
             )
         )
 
-        response_text = await self._responder.generate(message.text, ranked, has_more)
+        response_text = await self._build_response(filters, ranked, has_more)
         return OutgoingMessage(chat_id=message.chat_id, text=response_text)
+
+    async def _build_response(self, filters: SearchFilters, ranked: list[RankedResult], has_more: bool) -> str:
+        if not ranked:
+            return NO_RESULTS_MESSAGE
+        try:
+            features = await self._feature_extractor.extract([r.apartment.descripcion for r in ranked])
+        except LLMProviderError as exc:
+            # Las características son opcionales: si la extracción falla, seguimos
+            # con el mensaje armado solo desde los amenities estructurados.
+            logger.warning("feature_extraction_failed error=%r", exc)
+            features = [[] for _ in ranked]
+        return format_search_results(filters, ranked, features, has_more)
 
     def _resolve_filters_and_offset(
         self, extracted: ExtractedIntent, session: ConversationSession | None

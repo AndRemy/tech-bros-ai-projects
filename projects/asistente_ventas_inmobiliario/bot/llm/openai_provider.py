@@ -7,7 +7,16 @@ import openai
 from pydantic import ValidationError
 
 from ..core.exceptions import InvalidFiltersError, LLMProviderError, NLUExtractionError
-from ..core.models import RankedResult, SortOption
+from ..core.features import (
+    FEATURES_PARAMETERS_SCHEMA,
+    FEATURES_SYSTEM_PROMPT,
+    FEATURES_TOOL_DESCRIPTION,
+    FEATURES_TOOL_NAME,
+    FeatureExtractor,
+    align_features,
+    build_features_prompt,
+)
+from ..core.models import SortOption
 from ..core.nlu import (
     EXTRACT_TOOL_DESCRIPTION,
     EXTRACT_TOOL_NAME,
@@ -16,8 +25,16 @@ from ..core.nlu import (
     IntentExtractor,
     build_session_context,
 )
-from ..core.responder import NO_RESULTS_MESSAGE, SYSTEM_PROMPT, ResponseGenerator, build_prompt
 from ..core.session import ConversationSession
+
+_FEATURES_TOOL = {
+    "type": "function",
+    "function": {
+        "name": FEATURES_TOOL_NAME,
+        "description": FEATURES_TOOL_DESCRIPTION,
+        "parameters": FEATURES_PARAMETERS_SCHEMA,
+    },
+}
 
 _EXTRACT_TOOL = {
     "type": "function",
@@ -92,28 +109,37 @@ class OpenAIIntentExtractor(IntentExtractor):
             raise InvalidFiltersError(str(exc)) from exc
 
 
-class OpenAIResponseGenerator(ResponseGenerator):
+class OpenAIFeatureExtractor(FeatureExtractor):
     def __init__(self, client: openai.AsyncOpenAI, model: str = "gpt-4o-mini") -> None:
         self._client = client
         self._model = model
 
-    async def generate(self, query_text: str, results: list[RankedResult], has_more: bool) -> str:
-        prompt = build_prompt(query_text, results, has_more)
+    async def extract(self, descriptions: list[str]) -> list[list[str]]:
+        prompt = build_features_prompt(descriptions)
         if prompt is None:
-            return NO_RESULTS_MESSAGE
+            return [[] for _ in descriptions]
 
         try:
             response = await self._client.chat.completions.create(
                 model=self._model,
                 messages=[
-                    {"role": "system", "content": SYSTEM_PROMPT},
+                    {"role": "system", "content": FEATURES_SYSTEM_PROMPT},
                     {"role": "user", "content": prompt},
                 ],
+                tools=[_FEATURES_TOOL],
+                tool_choice={"type": "function", "function": {"name": FEATURES_TOOL_NAME}},
             )
         except openai.OpenAIError as exc:
             raise LLMProviderError(str(exc)) from exc
 
-        return response.choices[0].message.content or ""
+        tool_calls = response.choices[0].message.tool_calls
+        if not tool_calls:
+            return [[] for _ in descriptions]
+        try:
+            arguments = json.loads(tool_calls[0].function.arguments)
+        except json.JSONDecodeError:
+            return [[] for _ in descriptions]
+        return align_features(arguments, len(descriptions))
 
 
 def create_intent_extractor_from_env() -> OpenAIIntentExtractor:
@@ -123,8 +149,8 @@ def create_intent_extractor_from_env() -> OpenAIIntentExtractor:
     return OpenAIIntentExtractor(openai.AsyncOpenAI(api_key=api_key))
 
 
-def create_response_generator_from_env() -> OpenAIResponseGenerator:
+def create_feature_extractor_from_env() -> OpenAIFeatureExtractor:
     api_key = os.environ.get("OPENAI_API_KEY")
     if not api_key:
         raise RuntimeError("OPENAI_API_KEY no está configurado en .env")
-    return OpenAIResponseGenerator(openai.AsyncOpenAI(api_key=api_key))
+    return OpenAIFeatureExtractor(openai.AsyncOpenAI(api_key=api_key))

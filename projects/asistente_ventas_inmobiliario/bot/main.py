@@ -18,14 +18,14 @@ logging.basicConfig(level=logging.INFO)
 async def main() -> None:
     load_dotenv()
 
-    intent_extractor, responder = create_llm_provider(os.environ.get("LLM_PROVIDER", "anthropic"))
+    intent_extractor, feature_extractor = create_llm_provider(os.environ.get("LLM_PROVIDER", "anthropic"))
     repository = create_apartments_repository(os.environ["DATABASE_URL"])
     session_store = InMemorySessionStore(ttl_seconds=int(os.environ.get("SESSION_TTL_SECONDS", 1800)))
 
     orchestrator = Orchestrator(
         intent_extractor=intent_extractor,
         repository=repository,
-        responder=responder,
+        feature_extractor=feature_extractor,
         session_store=session_store,
     )
 
