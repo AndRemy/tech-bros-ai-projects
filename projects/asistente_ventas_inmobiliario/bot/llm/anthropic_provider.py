@@ -6,7 +6,16 @@ import anthropic
 from pydantic import ValidationError
 
 from ..core.exceptions import InvalidFiltersError, LLMProviderError, NLUExtractionError
-from ..core.models import RankedResult, SortOption
+from ..core.features import (
+    FEATURES_PARAMETERS_SCHEMA,
+    FEATURES_SYSTEM_PROMPT,
+    FEATURES_TOOL_DESCRIPTION,
+    FEATURES_TOOL_NAME,
+    FeatureExtractor,
+    align_features,
+    build_features_prompt,
+)
+from ..core.models import SortOption
 from ..core.nlu import (
     EXTRACT_TOOL_DESCRIPTION,
     EXTRACT_TOOL_NAME,
@@ -15,8 +24,13 @@ from ..core.nlu import (
     IntentExtractor,
     build_session_context,
 )
-from ..core.responder import NO_RESULTS_MESSAGE, SYSTEM_PROMPT, ResponseGenerator, build_prompt
 from ..core.session import ConversationSession
+
+_FEATURES_TOOL = {
+    "name": FEATURES_TOOL_NAME,
+    "description": FEATURES_TOOL_DESCRIPTION,
+    "input_schema": FEATURES_PARAMETERS_SCHEMA,
+}
 
 _EXTRACT_TOOL = {
     "name": EXTRACT_TOOL_NAME,
@@ -84,27 +98,32 @@ class AnthropicIntentExtractor(IntentExtractor):
             raise InvalidFiltersError(str(exc)) from exc
 
 
-class AnthropicResponseGenerator(ResponseGenerator):
+class AnthropicFeatureExtractor(FeatureExtractor):
     def __init__(self, client: anthropic.AsyncAnthropic, model: str = "claude-sonnet-5") -> None:
         self._client = client
         self._model = model
 
-    async def generate(self, query_text: str, results: list[RankedResult], has_more: bool) -> str:
-        prompt = build_prompt(query_text, results, has_more)
+    async def extract(self, descriptions: list[str]) -> list[list[str]]:
+        prompt = build_features_prompt(descriptions)
         if prompt is None:
-            return NO_RESULTS_MESSAGE
+            return [[] for _ in descriptions]
 
         try:
             response = await self._client.messages.create(
                 model=self._model,
                 max_tokens=1024,
-                system=SYSTEM_PROMPT,
+                system=FEATURES_SYSTEM_PROMPT,
+                tools=[_FEATURES_TOOL],
+                tool_choice={"type": "tool", "name": FEATURES_TOOL_NAME},
                 messages=[{"role": "user", "content": prompt}],
             )
         except anthropic.APIError as exc:
             raise LLMProviderError(str(exc)) from exc
 
-        return "".join(block.text for block in response.content if block.type == "text")
+        tool_use = next((block for block in response.content if block.type == "tool_use"), None)
+        if tool_use is None:
+            return [[] for _ in descriptions]
+        return align_features(tool_use.input, len(descriptions))
 
 
 def create_intent_extractor_from_env() -> AnthropicIntentExtractor:
@@ -114,8 +133,8 @@ def create_intent_extractor_from_env() -> AnthropicIntentExtractor:
     return AnthropicIntentExtractor(anthropic.AsyncAnthropic(api_key=api_key))
 
 
-def create_response_generator_from_env() -> AnthropicResponseGenerator:
+def create_feature_extractor_from_env() -> AnthropicFeatureExtractor:
     api_key = os.environ.get("ANTHROPIC_API_KEY")
     if not api_key:
         raise RuntimeError("ANTHROPIC_API_KEY no está configurado en .env")
-    return AnthropicResponseGenerator(anthropic.AsyncAnthropic(api_key=api_key))
+    return AnthropicFeatureExtractor(anthropic.AsyncAnthropic(api_key=api_key))

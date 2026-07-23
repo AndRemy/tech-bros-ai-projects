@@ -7,7 +7,16 @@ from google.genai import types
 from pydantic import ValidationError
 
 from ..core.exceptions import InvalidFiltersError, LLMProviderError, NLUExtractionError
-from ..core.models import RankedResult, SortOption
+from ..core.features import (
+    FEATURES_PARAMETERS_SCHEMA,
+    FEATURES_SYSTEM_PROMPT,
+    FEATURES_TOOL_DESCRIPTION,
+    FEATURES_TOOL_NAME,
+    FeatureExtractor,
+    align_features,
+    build_features_prompt,
+)
+from ..core.models import SortOption
 from ..core.nlu import (
     EXTRACT_TOOL_DESCRIPTION,
     EXTRACT_TOOL_NAME,
@@ -16,7 +25,6 @@ from ..core.nlu import (
     IntentExtractor,
     build_session_context,
 )
-from ..core.responder import NO_RESULTS_MESSAGE, SYSTEM_PROMPT, ResponseGenerator, build_prompt
 from ..core.session import ConversationSession
 
 # Alias que Google mantiene apuntando al modelo flash vigente, en vez de una
@@ -101,25 +109,47 @@ class GeminiIntentExtractor(IntentExtractor):
             raise InvalidFiltersError(str(exc)) from exc
 
 
-class GeminiResponseGenerator(ResponseGenerator):
+_FEATURES_TOOL = types.Tool(
+    function_declarations=[
+        types.FunctionDeclaration(
+            name=FEATURES_TOOL_NAME,
+            description=FEATURES_TOOL_DESCRIPTION,
+            parameters_json_schema=FEATURES_PARAMETERS_SCHEMA,
+        )
+    ]
+)
+
+
+class GeminiFeatureExtractor(FeatureExtractor):
     def __init__(self, client: genai.Client) -> None:
         self._client = client
 
-    async def generate(self, query_text: str, results: list[RankedResult], has_more: bool) -> str:
-        prompt = build_prompt(query_text, results, has_more)
+    async def extract(self, descriptions: list[str]) -> list[list[str]]:
+        prompt = build_features_prompt(descriptions)
         if prompt is None:
-            return NO_RESULTS_MESSAGE
+            return [[] for _ in descriptions]
 
         try:
             response = await self._client.aio.models.generate_content(
                 model=_MODEL_NAME,
                 contents=prompt,
-                config=types.GenerateContentConfig(system_instruction=SYSTEM_PROMPT),
+                config=types.GenerateContentConfig(
+                    system_instruction=FEATURES_SYSTEM_PROMPT,
+                    tools=[_FEATURES_TOOL],
+                    tool_config=types.ToolConfig(
+                        function_calling_config=types.FunctionCallingConfig(
+                            mode="ANY", allowed_function_names=[FEATURES_TOOL_NAME]
+                        )
+                    ),
+                ),
             )
-        except Exception as exc:
+        except Exception as exc:  # google-genai no expone una jerarquía de excepciones propia y estable
             raise LLMProviderError(str(exc)) from exc
 
-        return response.text or ""
+        function_calls = response.function_calls
+        if not function_calls:
+            return [[] for _ in descriptions]
+        return align_features(function_calls[0].args, len(descriptions))
 
 
 def create_intent_extractor_from_env() -> GeminiIntentExtractor:
@@ -129,8 +159,8 @@ def create_intent_extractor_from_env() -> GeminiIntentExtractor:
     return GeminiIntentExtractor(genai.Client(api_key=api_key))
 
 
-def create_response_generator_from_env() -> GeminiResponseGenerator:
+def create_feature_extractor_from_env() -> GeminiFeatureExtractor:
     api_key = os.environ.get("GEMINI_API_KEY")
     if not api_key:
         raise RuntimeError("GEMINI_API_KEY no está configurado en .env")
-    return GeminiResponseGenerator(genai.Client(api_key=api_key))
+    return GeminiFeatureExtractor(genai.Client(api_key=api_key))
