@@ -3,16 +3,14 @@
 > **"Busco un depa en Surco, 2 cuartos, máximo S/ 2,500"** — y el bot
 > responde con las 3 mejores opciones en segundos.
 
-Proyecto educativo de portafolio; los datos se usan únicamente como demo,
-sin fines comerciales.
-
 ## El problema
 
 Buscar departamento en Lima es un infierno de filtros: portales, 20 pestañas,
 comparar a mano, y repetir todo cada vez que cambias un criterio.
 
 Eso nos dejó una pregunta de ingeniería: ¿puede un bot entender una frase así
-y responder con datos reales — **sin que la IA escriba una sola línea de SQL**?
+y responder con datos reales? Con una restricción de diseño: el LLM solo
+extrae filtros estructurados; la consulta SQL la construye código determinístico.
 
 Construimos una demo de agente de IA inmobiliario para averiguarlo.
 
@@ -39,7 +37,7 @@ Construimos una demo de agente de IA inmobiliario para averiguarlo.
 - **Resiliente**: los errores se responden con mensajes de plantilla fija —
   el bot sigue contestando aunque el proveedor de LLM esté caído.
 
-## División de responsabilidades: LLM vs. código determinista
+## LLM vs. código determinístico
 
 | Etapa     | ¿LLM o código? | Qué produce                                  |
 |-----------|----------------|----------------------------------------------|
