@@ -29,7 +29,7 @@ Construimos una demo de agente de IA inmobiliario para averiguarlo.
 ## Arquitectura técnica
 
 - **Scraping híbrido**: Apify API para volumen + crawler propio con Playwright;
-  parser que descarta preventas y avisos fuera de los distritos objetivo, dedupe por lote.
+  parser que descarta preventas y avisos fuera de los distritos objetivo.
 - **Arquitectura hexagonal**: el núcleo no conoce Telegram, Postgres ni Anthropic —
   solo interfaces. Tres factories: canal, base de datos, proveedor de LLM.
 - **Canal-agnóstico**: Telegram y Discord corren en paralelo; agregar WhatsApp = un adapter.
