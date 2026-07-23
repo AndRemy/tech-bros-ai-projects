@@ -1,17 +1,62 @@
-# Asistente de Ventas Inmobiliario
+# Asistente de Ventas Inmobiliario 🏠🤖
 
-Bot conversacional que responde preguntas en lenguaje natural sobre disponibilidad de
-departamentos, usando GenAI para entender la solicitud, construir la consulta contra la
-base de datos y redactar la respuesta. Es agnóstico al canal: hoy soporta Telegram y
-Discord, y se pueden agregar nuevos canales sin tocar el núcleo del bot.
+> **"Busco un depa en Surco, 2 cuartos, máximo S/ 2,500"** — y el bot
+> responde con las 3 mejores opciones en segundos.
 
-Este proyecto es parte del portafolio `tech-bros-ai-projects` pero se instala y corre de
-forma independiente — todo lo que necesitas está en esta carpeta.
+Proyecto educativo de portafolio; los datos se usan únicamente como demo,
+sin fines comerciales.
 
-## Arquitectura
+## El problema
+
+Buscar departamento en Lima es un infierno de filtros: portales, 20 pestañas,
+comparar a mano, y repetir todo cada vez que cambias un criterio.
+
+Eso nos dejó una pregunta de ingeniería: ¿puede un bot entender una frase así
+y responder con datos reales — **sin que la IA escriba una sola línea de SQL**?
+
+Construimos una demo de agente de IA inmobiliario para averiguarlo.
+
+## Cómo funciona
+
+```
+  Capa de usuario         Bot (runtime)                    Base de datos           Scraping / ETL
+  ───────────────         ─────────────                    ─────────────           ──────────────
+
+  Chat de Telegram   →    NLU (LLM #1) → filtros JSON  →   Postgres (Neon)    ←    Apify API
+  "busco depa en          QueryBuilder → SQL (código)      654 inmuebles           Playwright crawler
+  Surco, 2 cuartos,       Ranking → top-3 paginado         tipo × operación        parser
+  máx S/ 2,500"           Responder (LLM #2) → chat        12 columnas             listados públicos de Lima
+```
+
+## Arquitectura técnica
+
+- **Scraping híbrido**: Apify API para volumen + crawler propio con Playwright;
+  parser que descarta preventas y avisos fuera de los distritos objetivo, dedupe por lote.
+- **Arquitectura hexagonal**: el núcleo no conoce Telegram, Postgres ni Anthropic —
+  solo interfaces. Tres factories: canal, base de datos, proveedor de LLM.
+- **Canal-agnóstico**: Telegram y Discord corren en paralelo; agregar WhatsApp = un adapter.
+- **LLM-agnóstico**: Anthropic, OpenAI o Gemini con una variable de entorno.
+- **Resiliente**: los errores se responden con mensajes de plantilla fija —
+  el bot sigue contestando aunque el proveedor de LLM esté caído.
+
+## Dos LLM, cero SQL generado por IA
+
+| Etapa     | ¿LLM o código? | Qué produce                                  |
+|-----------|----------------|----------------------------------------------|
+| Entender  | 🤖 LLM #1      | JSON de filtros validado contra schema        |
+| Consultar | ⚙️ Código      | SQL parametrizado — inyección imposible       |
+| Rankear   | ⚙️ Código      | Relevancia + fecha, top-3 con paginación      |
+| Responder | 🤖 LLM #2      | 2-3 oraciones por opción, tono natural        |
+
+**En números:** 654 inmuebles reales · 9 distritos de Lima · 2 canales ·
+3 proveedores de LLM intercambiables · arquitectura hexagonal.
+
+---
+
+## Arquitectura en detalle
 
 Arquitectura hexagonal (puertos y adaptadores). El núcleo (`bot/core`) no sabe nada de
-Telegram, Discord ni SQLite; solo conoce interfaces (`bot/adapters/base.py`,
+Telegram, Discord ni la base de datos; solo conoce interfaces (`bot/adapters/base.py`,
 `bot/core/session.py`, `bot/repository/apartments_repository.py`) que las piezas
 concretas implementan.
 
@@ -22,13 +67,14 @@ Canal (Telegram/Discord)
   -> ChannelAdapter        recibe y normaliza a IncomingMessage
   -> Orchestrator          coordina el pipeline y el estado de la conversación
   -> NLU (LLM #1)          texto -> intención + filtros estructurados
-  -> QueryBuilder + Repository   filtros -> SQL parametrizado -> SQLite
+  -> QueryBuilder + Repository   filtros -> SQL parametrizado -> base de datos
   -> Ranking                relevancia a la descripción, luego fecha de publicación descendente
   -> Responder (LLM #2)     resultados -> 2-3 oraciones por opción
   -> ChannelAdapter          envía la respuesta al canal de origen
 ```
 
-Decisiones de diseño relevantes:
+<details>
+<summary><b>Decisiones de diseño relevantes</b> (clic para expandir)</summary>
 
 - **El LLM nunca genera SQL directo.** El NLU produce un JSON de filtros validado contra
   un schema; el `QueryBuilder` es código determinista que arma la consulta parametrizada.
@@ -52,6 +98,8 @@ Decisiones de diseño relevantes:
   `ResponseGenerator`) usar según `LLM_PROVIDER`. En los tres casos `main.py` solo conoce la
   interfaz — agregar un backend de base de datos, un canal o un proveedor de LLM nuevo es
   agregar una entrada al diccionario del factory correspondiente, sin tocar el resto del bot.
+
+</details>
 
 ## Estructura
 
@@ -81,7 +129,7 @@ asistente_ventas_inmobiliario/
 │   └── repository/
 │       ├── factory.py               # DATABASE_URL -> ApartmentsRepository concreto
 │       └── apartments_repository.py
-├── scrapper/                        # extracción de listados desde Urbania.pe (Apify + Playwright)
+├── scrapper/                        # extracción de listados públicos (Apify + Playwright)
 │   ├── orchestrator_apify.py        # recorre distritos/operaciones vía Apify -> resultados_finales.json
 │   ├── orchestrator.py              # variante propia con Playwright: crawler.py + urbania_scraper.py
 │   ├── load_to_db.py                # carga resultados_finales.json a la tabla `apartments`
@@ -90,7 +138,7 @@ asistente_ventas_inmobiliario/
 ├── database/                        # esquema SQLModel (Property, DistrictStats) + engine
 │   ├── db.py
 │   └── models.py
-├── ingestion/                       # ingesta on-demand: un link de Urbania -> fila en la base
+├── ingestion/                       # ingesta on-demand: un link -> fila en la base
 │   └── ingestor.py
 ├── utils/                           # helpers compartidos por scrapper/database/ingestion
 │   └── helpers.py
@@ -100,6 +148,52 @@ asistente_ventas_inmobiliario/
 │   └── real_estate.db               # SQLite local
 ├── requirements.txt
 └── .env.example
+```
+
+## Instalación
+
+Este proyecto es parte del portafolio `tech-bros-ai-projects` pero se instala y corre de
+forma independiente — todo lo que necesitas está en esta carpeta.
+
+```bash
+cd projects/asistente_ventas_inmobiliario
+python -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+playwright install chromium  # solo si vas a correr scrapper/crawler.py o urbania_scraper.py
+cp .env.example .env  # completar con credenciales reales
+```
+
+## Correr el bot
+
+Los canales activos se listan en `ENABLED_CHANNELS` dentro de `.env` (ej.
+`ENABLED_CHANNELS=telegram,discord`); el bot corre todos los que estén en esa lista al
+mismo tiempo, cada uno con su propio token (`TELEGRAM_BOT_TOKEN`, `DISCORD_BOT_TOKEN`, ...).
+El proveedor de LLM se elige con `LLM_PROVIDER=anthropic|openai|gemini`; solo hace falta la
+API key de ese proveedor (`ANTHROPIC_API_KEY`, `OPENAI_API_KEY` o `GEMINI_API_KEY`).
+
+```bash
+python -m bot.main
+```
+
+## Correr el pipeline de scraping / ETL
+
+Los scripts de `scrapper/`, `database/`, `ingestion/` y `tests/` asumen que se ejecutan
+con el directorio de trabajo en la raíz del proyecto (`projects/asistente_ventas_inmobiliario/`),
+igual que el bot, para que los imports (`from database.db import ...`, `from scrapper...`,
+`from utils.helpers import ...`) resuelvan correctamente:
+
+```bash
+cd projects/asistente_ventas_inmobiliario
+
+# Extracción vía Apify (requiere APIFY_API_TOKEN en .env) + carga a `apartments`
+cd scrapper && python orchestrator_apify.py && python load_to_db.py && cd ..
+
+# Ingesta on-demand de un link individual (usa database/ + tablas Property/DistrictStats)
+python -c "from ingestion.ingestor import ingest_property_link; ingest_property_link('https://...')"
+
+# Tests
+pytest tests/
 ```
 
 ## Estado actual / pendientes
@@ -180,46 +274,3 @@ Qué haría falta para mitigarlo, en orden de prioridad:
   enviarla.
 - **Red-teaming**: probar payloads de jailbreak conocidos, tanto como mensaje de usuario como
   metidos en una `descripcion` de prueba, antes y después de cualquier mitigación.
-
-## Instalación
-
-```bash
-cd projects/asistente_ventas_inmobiliario
-python -m venv .venv
-source .venv/bin/activate
-pip install -r requirements.txt
-playwright install chromium  # solo si vas a correr scrapper/crawler.py o urbania_scraper.py
-cp .env.example .env  # completar con credenciales reales
-```
-
-## Correr el bot
-
-Los canales activos se listan en `ENABLED_CHANNELS` dentro de `.env` (ej.
-`ENABLED_CHANNELS=telegram,discord`); el bot corre todos los que estén en esa lista al
-mismo tiempo, cada uno con su propio token (`TELEGRAM_BOT_TOKEN`, `DISCORD_BOT_TOKEN`, ...).
-El proveedor de LLM se elige con `LLM_PROVIDER=anthropic|openai|gemini`; solo hace falta la
-API key de ese proveedor (`ANTHROPIC_API_KEY`, `OPENAI_API_KEY` o `GEMINI_API_KEY`).
-
-```bash
-python -m bot.main
-```
-
-## Correr el pipeline de scraping / ETL
-
-Los scripts de `scrapper/`, `database/`, `ingestion/` y `tests/` asumen que se ejecutan
-con el directorio de trabajo en la raíz del proyecto (`projects/asistente_ventas_inmobiliario/`),
-igual que el bot, para que los imports (`from database.db import ...`, `from scrapper...`,
-`from utils.helpers import ...`) resuelvan correctamente:
-
-```bash
-cd projects/asistente_ventas_inmobiliario
-
-# Extracción vía Apify (requiere APIFY_API_TOKEN en .env) + carga a `apartments`
-cd scrapper && python orchestrator_apify.py && python load_to_db.py && cd ..
-
-# Ingesta on-demand de un link individual (usa database/ + tablas Property/DistrictStats)
-python -c "from ingestion.ingestor import ingest_property_link; ingest_property_link('https://urbania.pe/...')"
-
-# Tests
-pytest tests/
-```
