@@ -70,7 +70,7 @@ Para "aprender a configurar un LLM local", la ruta recomendada es **A** con Olla
 
 ## 5. ¿Alternativa en venv (Python)?
 
-Para Gemma 2 9B y DeepSeek-R1 Distill 14B (ver [gemma-2-9b.md](gemma-2-9b.md) y [deepseek-r1-distill-14b.md](deepseek-r1-distill-14b.md)) sí es recomendable usar un venv con `llama-cpp-python` como alternativa a Ollama. **Para Kimi K2 no cambia nada relevante**: el problema no es el método de instalación (Ollama vs. Python vs. binario), sino que los pesos cuantizados siguen pesando cientos de GB — eso no lo resuelve un entorno virtual. Un venv seguiría necesitando descargar y cargar en RAM/VRAM los mismos archivos gigantes, así que en la práctica solo tendría sentido en un servidor con la infraestructura de la sección 3 (ruta A o B), no en esta máquina.
+Para Gemma 2 9B y DeepSeek-R1 Distill 14B (ver [gemma-2-9b.md](../gemma-2/gemma-2-9b.md) y [deepseek-r1-distill-14b.md](../deepseek-r1/deepseek-r1-distill-14b.md)) sí es recomendable usar un venv con `llama-cpp-python` como alternativa a Ollama. **Para Kimi K2 no cambia nada relevante**: el problema no es el método de instalación (Ollama vs. Python vs. binario), sino que los pesos cuantizados siguen pesando cientos de GB — eso no lo resuelve un entorno virtual. Un venv seguiría necesitando descargar y cargar en RAM/VRAM los mismos archivos gigantes, así que en la práctica solo tendría sentido en un servidor con la infraestructura de la sección 3 (ruta A o B), no en esta máquina.
 
 ## 6. Alternativa — llama.cpp directo (más control, más manual)
 
