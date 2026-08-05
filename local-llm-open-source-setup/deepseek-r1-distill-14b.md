@@ -65,7 +65,56 @@ Guía paso a paso para instalar y probar **DeepSeek-R1 Distill Qwen 14B** en loc
 - `ollama pull deepseek-r1:32b` — versión más grande (32B, ~20GB), técnicamente cabe en 24GB de RAM pero deja muy poco margen para el resto del sistema; no recomendado correr junto con otras apps pesadas.
 - `ollama pull deepseek-r1:1.5b` — versión mínima, útil solo para pruebas rápidas de flujo, calidad limitada.
 
-## 5. Checklist
+## 5. Alternativa: instalar y correr en un entorno virtual (venv) de Python
+
+Ollama no se instala "dentro" de un venv — es un binario/servicio del sistema. Si preferís un enfoque 100% Python, aislado en un venv y fácil de versionar en `requirements.txt`, podés usar `llama-cpp-python` para cargar directamente el mismo archivo GGUF cuantizado.
+
+**Recomendable cuando** vas a integrar el modelo en un script/notebook de Python, o querés mantener el setup dentro del repo del proyecto. **No es necesario** si solo querés probarlo por chat — ahí Ollama (sección 3) es más simple.
+
+### Pasos
+
+1. **Crear y activar el venv**
+   ```bash
+   python3 -m venv .venv
+   source .venv/bin/activate
+   ```
+
+2. **Instalar `llama-cpp-python`** (con aceleración Metal en Apple Silicon)
+   ```bash
+   CMAKE_ARGS="-DGGML_METAL=on" pip install llama-cpp-python
+   ```
+   En Linux con GPU NVIDIA, usar `CMAKE_ARGS="-DGGML_CUDA=on"`. Sin GPU, se puede correr en CPU (más lento, pero funcional).
+
+3. **Descargar el archivo GGUF cuantizado** desde Hugging Face (ej. desde `bartowski/DeepSeek-R1-Distill-Qwen-14B-GGUF`)
+   ```bash
+   pip install huggingface_hub
+   huggingface-cli download bartowski/DeepSeek-R1-Distill-Qwen-14B-GGUF DeepSeek-R1-Distill-Qwen-14B-Q4_K_M.gguf --local-dir ./models
+   ```
+
+4. **Probar el modelo con un script simple** (mostrando la cadena de razonamiento)
+   ```python
+   from llama_cpp import Llama
+
+   llm = Llama(model_path="./models/DeepSeek-R1-Distill-Qwen-14B-Q4_K_M.gguf", n_ctx=4096, n_gpu_layers=-1)
+   respuesta = llm.create_chat_completion(
+       messages=[{"role": "user", "content": "Resuelve: 17 * 24, muestra tu razonamiento"}]
+   )
+   print(respuesta["choices"][0]["message"]["content"])
+   ```
+
+5. **(Opcional) Levantar un servidor HTTP compatible con la API de OpenAI**, sin depender de Ollama
+   ```bash
+   pip install 'llama-cpp-python[server]'
+   python3 -m llama_cpp.server --model ./models/DeepSeek-R1-Distill-Qwen-14B-Q4_K_M.gguf --n_gpu_layers -1
+   ```
+   Servidor disponible en `http://localhost:8000` con endpoints tipo `/v1/chat/completions`.
+
+6. **Desactivar el venv al terminar**
+   ```bash
+   deactivate
+   ```
+
+## 6. Checklist
 
 - [ ] Ollama instalado y verificado
 - [ ] `ollama pull deepseek-r1:14b` ejecutado sin errores
@@ -73,7 +122,7 @@ Guía paso a paso para instalar y probar **DeepSeek-R1 Distill Qwen 14B** en loc
 - [ ] Prompt de razonamiento probado y cadena de pensamiento visible
 - [ ] Llamada API vía `curl` respondiendo correctamente
 
-## 6. Referencias
+## 7. Referencias
 
 - Ollama library: https://ollama.com/library/deepseek-r1
 - Modelo en Hugging Face: https://huggingface.co/deepseek-ai/DeepSeek-R1-Distill-Qwen-14B

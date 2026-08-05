@@ -62,14 +62,67 @@ Guía paso a paso para instalar y probar **Gemma 2 9B** (Google) en local usando
 - `ollama pull gemma2:2b` — versión más chica (2B), útil si quieres algo aún más rápido para pruebas.
 - `ollama pull gemma2:27b` — versión más grande (27B, ~15GB), viable en esta máquina pero con menos margen de RAM libre para otras apps.
 
-## 5. Checklist
+## 5. Alternativa: instalar y correr en un entorno virtual (venv) de Python
+
+Ollama en sí **no** es un paquete de Python — es un binario/servicio del sistema, así que no se instala "dentro" de un venv. Pero si preferís un enfoque 100% Python (aislado, reproducible, sin instalar un servicio a nivel de sistema), podés usar `llama-cpp-python`, que sí es instalable vía pip y carga directamente los mismos archivos GGUF cuantizados.
+
+**Es recomendable cuando:**
+- Querés que todo el setup viva dentro del proyecto/repo (útil para reproducibilidad o para versionar dependencias en `requirements.txt`).
+- Vas a integrar el modelo en un script o notebook de Python en vez de usarlo solo por chat/CLI.
+
+**No es necesario si** solo querés probar el modelo por chat — ahí Ollama (sección 3) es más simple.
+
+### Pasos
+
+1. **Crear y activar el venv**
+   ```bash
+   python3 -m venv .venv
+   source .venv/bin/activate
+   ```
+
+2. **Instalar `llama-cpp-python`** (con aceleración Metal en Apple Silicon)
+   ```bash
+   CMAKE_ARGS="-DGGML_METAL=on" pip install llama-cpp-python
+   ```
+   En Linux con GPU NVIDIA, usar `CMAKE_ARGS="-DGGML_CUDA=on"` en su lugar. Sin GPU, se puede omitir `CMAKE_ARGS` y correr en CPU (más lento).
+
+3. **Descargar el archivo GGUF cuantizado** directamente desde Hugging Face (ej. desde `bartowski/gemma-2-9b-it-GGUF`)
+   ```bash
+   pip install huggingface_hub
+   huggingface-cli download bartowski/gemma-2-9b-it-GGUF gemma-2-9b-it-Q4_K_M.gguf --local-dir ./models
+   ```
+
+4. **Probar el modelo con un script simple**
+   ```python
+   from llama_cpp import Llama
+
+   llm = Llama(model_path="./models/gemma-2-9b-it-Q4_K_M.gguf", n_ctx=4096, n_gpu_layers=-1)
+   respuesta = llm.create_chat_completion(
+       messages=[{"role": "user", "content": "Explícame qué es un modelo de lenguaje en dos frases"}]
+   )
+   print(respuesta["choices"][0]["message"]["content"])
+   ```
+
+5. **(Opcional) Levantar un servidor HTTP compatible con la API de OpenAI**, sin depender de Ollama
+   ```bash
+   pip install 'llama-cpp-python[server]'
+   python3 -m llama_cpp.server --model ./models/gemma-2-9b-it-Q4_K_M.gguf --n_gpu_layers -1
+   ```
+   Esto expone un servidor en `http://localhost:8000` con endpoints compatibles con la API de OpenAI (`/v1/chat/completions`, etc.).
+
+6. **Desactivar el venv al terminar**
+   ```bash
+   deactivate
+   ```
+
+## 6. Checklist
 
 - [ ] Ollama instalado y verificado
 - [ ] `ollama pull gemma2:9b` ejecutado sin errores
 - [ ] Chat interactivo probado con `ollama run gemma2:9b`
 - [ ] Llamada API vía `curl` respondiendo correctamente
 
-## 6. Referencias
+## 7. Referencias
 
 - Ollama library: https://ollama.com/library/gemma2
 - Modelo en Hugging Face: https://huggingface.co/google/gemma-2-9b-it

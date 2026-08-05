@@ -68,7 +68,11 @@ Para "aprender a configurar un LLM local", la ruta recomendada es **A** con Olla
    }'
    ```
 
-## 5. Alternativa — llama.cpp directo (más control, más manual)
+## 5. ¿Alternativa en venv (Python)?
+
+Para Gemma 2 9B y DeepSeek-R1 Distill 14B (ver [gemma-2-9b.md](gemma-2-9b.md) y [deepseek-r1-distill-14b.md](deepseek-r1-distill-14b.md)) sí es recomendable usar un venv con `llama-cpp-python` como alternativa a Ollama. **Para Kimi K2 no cambia nada relevante**: el problema no es el método de instalación (Ollama vs. Python vs. binario), sino que los pesos cuantizados siguen pesando cientos de GB — eso no lo resuelve un entorno virtual. Un venv seguiría necesitando descargar y cargar en RAM/VRAM los mismos archivos gigantes, así que en la práctica solo tendría sentido en un servidor con la infraestructura de la sección 3 (ruta A o B), no en esta máquina.
+
+## 6. Alternativa — llama.cpp directo (más control, más manual)
 
 1. Clonar y compilar llama.cpp:
    ```bash
@@ -86,7 +90,7 @@ Para "aprender a configurar un LLM local", la ruta recomendada es **A** con Olla
    ```
    - `-ngl` controla cuántas capas se descargan a GPU (ajustar según VRAM disponible).
 
-## 6. Notas importantes sobre el tamaño del modelo
+## 7. Notas importantes sobre el tamaño del modelo
 
 - Kimi K2 es uno de los modelos open-weight más grandes disponibles. Incluso en cuantización 4-bit, los pesos ocupan **cientos de GB**.
 - Si tu hardware no alcanza, considera:
@@ -94,7 +98,7 @@ Para "aprender a configurar un LLM local", la ruta recomendada es **A** con Olla
   - Usar la Ruta C (GPU en la nube) solo para el aprendizaje inicial, sin comprar hardware.
   - Practicar el mismo flujo (Ollama, llama.cpp) primero con un modelo más chico (ej. Llama 3.1 8B, Mistral 7B) para entender el proceso, y luego escalar a Kimi K2 cuando tengas claro el setup y el hardware adecuado.
 
-## 7. Checklist de infraestructura mínima realista
+## 8. Checklist de infraestructura mínima realista
 
 - [ ] GPU NVIDIA 24GB+ VRAM (o Mac con 64GB+ RAM unificada)
 - [ ] 400GB de disco libre en SSD
@@ -103,13 +107,13 @@ Para "aprender a configurar un LLM local", la ruta recomendada es **A** con Olla
 - [ ] Ollama o llama.cpp instalado
 - [ ] Conexión a internet estable para la descarga inicial (puede ser de cientos de GB)
 
-## 8. Referencias
+## 9. Referencias
 
 - Ollama: https://ollama.com
 - llama.cpp: https://github.com/ggml-org/llama.cpp
 - Kimi K2 en Hugging Face: https://huggingface.co/moonshotai
 
-## 9. Alternativa realista para esta máquina (Mac M4 Pro, 24GB RAM)
+## 10. Alternativa realista para esta máquina (Mac M4 Pro, 24GB RAM)
 
 Con este hardware (chip Apple Silicon M4 Pro, 24GB de RAM unificada, ~494GB de disco libre), **Kimi K2 no es viable ni cuantizado** — requiere cientos de GB solo para los pesos. La RAM unificada de un Mac es compartida entre CPU y GPU, así que el límite real de "modelo que carga" ronda los 12–16GB de pesos (dejando margen para el sistema).
 

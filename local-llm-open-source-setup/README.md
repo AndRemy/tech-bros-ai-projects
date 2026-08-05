@@ -16,4 +16,4 @@ Ejercicio práctico para aprender a instalar y probar modelos de lenguaje open s
 2. Continuar con **DeepSeek-R1 Distill 14B** — más capaz, especialmente bueno en razonamiento, todavía cómodo en 24GB de RAM.
 3. Leer el manual de **Kimi K2** como referencia de qué implica escalar a un modelo de nivel datacenter (aunque no sea ejecutable en esta máquina).
 
-Cada manual es independiente y contiene: qué es el modelo, requisitos de infraestructura, pasos de instalación con Ollama, y cómo probarlo vía chat y API HTTP local.
+Cada manual es independiente y contiene: qué es el modelo, requisitos de infraestructura, pasos de instalación con Ollama, cómo probarlo vía chat y API HTTP local, y una **alternativa en entorno virtual (venv) de Python** con `llama-cpp-python` para quienes prefieran un setup aislado dentro del proyecto en vez del servicio de sistema de Ollama (ver sección correspondiente en `gemma-2-9b.md` y `deepseek-r1-distill-14b.md`; en `kimi-k2.md` se explica por qué el venv no resuelve el problema de tamaño en ese caso).
