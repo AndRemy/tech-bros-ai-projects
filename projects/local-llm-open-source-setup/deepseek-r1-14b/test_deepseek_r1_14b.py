@@ -2,7 +2,7 @@
 
 Uso:
     source .venv/bin/activate
-    python projects/local-llm-open-source-setup/deepseek-r1/test_deepseek_r1_14b.py
+    python projects/local-llm-open-source-setup/deepseek-r1-14b/test_deepseek_r1_14b.py
 """
 
 from pathlib import Path
