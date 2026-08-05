@@ -6,9 +6,9 @@ Ejercicio práctico para aprender a instalar y probar modelos de lenguaje open s
 
 | Manual | Modelo | Tamaño | RAM aprox. necesaria | Compatible con esta máquina |
 |---|---|---|---|---|
-| [kimi-k2.md](kimi-k2.md) | Kimi K2 (Moonshot AI) | ~1T parámetros (32B activos) | Cientos de GB | ❌ No — solo como referencia teórica |
-| [gemma-2-9b.md](gemma-2-9b.md) | Gemma 2 9B (Google) | 9B | ~6GB | ✅ Sí |
-| [deepseek-r1-distill-14b.md](deepseek-r1-distill-14b.md) | DeepSeek-R1 Distill 14B | 14B | ~9–10GB | ✅ Sí |
+| [kimi-k2.md](kimi-k2/kimi-k2.md) | Kimi K2 (Moonshot AI) | ~1T parámetros (32B activos) | Cientos de GB | ❌ No — solo como referencia teórica |
+| [gemma-2-9b.md](gemma-2/gemma-2-9b.md) | Gemma 2 9B (Google) | 9B | ~6GB | ✅ Sí |
+| [deepseek-r1-distill-14b.md](deepseek-r1/deepseek-r1-distill-14b.md) | DeepSeek-R1 Distill 14B | 14B | ~9–10GB | ✅ Sí |
 
 ## Recomendación de orden
 
