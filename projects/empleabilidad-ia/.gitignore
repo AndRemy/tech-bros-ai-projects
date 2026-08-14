@@ -1,0 +1,16 @@
+# Credenciales — el repo es público
+.env
+
+# Scraping crudo. No se versiona por tres razones (ver docs/DECISIONES.md §8):
+#   1. Es data PRE-limpieza: reprocesarla con uploader.py reinserta avisos que
+#      clean_db.py ya purgó.
+#   2. Es contenido de terceros (avisos de portales de empleo).
+#   3. El pipeline la regenera: los scrapers escriben directo a la base.
+data_raw/
+
+# Lotes de la extracción manual (manual_batch.py)
+lote*.json
+
+__pycache__/
+*.pyc
+.venv/
