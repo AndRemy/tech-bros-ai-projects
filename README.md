@@ -12,3 +12,9 @@ and installed independently of the rest of the portfolio.
   conversational bot (Telegram/Discord) that answers natural-language questions
   about apartment availability, backed by a scraping/ETL pipeline that feeds a
   SQLite database.
+
+- [`empleabilidad-ia`](projects/empleabilidad-ia/README.md) —
+  labour-market study measuring AI skill demand in Peru. Scrapes real job
+  postings, structures them with an LLM into a skills taxonomy, and classifies
+  each posting as an AI-native role, a traditional role that now requires AI, or
+  neither. 544 postings, 269 companies.
