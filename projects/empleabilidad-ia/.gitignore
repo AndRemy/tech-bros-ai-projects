@@ -11,6 +11,11 @@ data_raw/
 # Lotes de la extracción manual (manual_batch.py)
 lote*.json
 
+# Exports intermedios de analisis/ y reporte/ (ej. data.json para el HTML).
+# Se regeneran corriendo el pipeline; no se versionan.
+datos/*
+!datos/.gitkeep
+
 __pycache__/
 *.pyc
 .venv/
