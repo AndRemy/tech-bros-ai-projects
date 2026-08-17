@@ -6,10 +6,10 @@
 en este orden:**
 
 ```bash
-python dedup_contenido.py --apply
-python consolidar_skills.py --apply
-python nivel_desde_titulo.py --apply
-python clasificar_ofertas.py --apply
+python analisis/dedup_contenido.py --apply
+python analisis/consolidar_skills.py --apply
+python analisis/nivel_desde_titulo.py --apply
+python analisis/clasificar_ofertas.py --apply
 ```
 
 No es una recomendación de estilo. Cada extracción con LLM **regenera** los mismos
@@ -49,27 +49,30 @@ mal. Por eso el orden está documentado y no confiado a la memoria.
 # Preparación
 pip install -r requirements.txt
 cp .env.example .env       # completar credenciales
-python setup_db.py
+python ingesta/setup_db.py
 
-# Scraping
-python scraper_laborum_dirigido.py --dry-run     # previsualiza
-python scraper_laborum_dirigido.py               # gratis
-python scraper_linkedin.py                       # muestra plan, no gasta
-python scraper_linkedin.py --apply               # gasta crédito Apify
+# Scraping (ingesta/)
+python ingesta/scraper_laborum_dirigido.py --dry-run     # previsualiza
+python ingesta/scraper_laborum_dirigido.py               # gratis
+python ingesta/scraper_linkedin.py                       # muestra plan, no gasta
+python ingesta/scraper_linkedin.py --apply               # gasta crédito Apify
 
 # Filtrado de ruido (solo portales generalistas)
-python clean_db.py                               # previsualiza
-python clean_db.py --apply
+python ingesta/clean_db.py                               # previsualiza
+python ingesta/clean_db.py --apply
 
-# Extracción
-python processor.py --dry-run --limit 3          # valida credenciales
-python processor.py
+# Extracción (analisis/)
+python analisis/processor.py --dry-run --limit 3         # valida credenciales
+python analisis/processor.py
 
 # Limpieza (los cuatro, en orden)
-python dedup_contenido.py --apply
-python consolidar_skills.py --apply
-python nivel_desde_titulo.py --apply
-python clasificar_ofertas.py --apply
+python analisis/dedup_contenido.py --apply
+python analisis/consolidar_skills.py --apply
+python analisis/nivel_desde_titulo.py --apply
+python analisis/clasificar_ofertas.py --apply
+
+# Reporte (reporte/)
+python reporte/generar_reporte.py
 ```
 
 ## Convención de banderas
@@ -92,9 +95,9 @@ Pydantic y la misma función `guardar()` — así las filas quedan idénticas po
 cualquiera de los dos caminos.
 
 ```bash
-python manual_batch.py --status              # avance
-python manual_batch.py --fetch 3 --todas     # saca el siguiente lote
-python manual_batch.py --write lote.json     # valida y escribe
+python analisis/manual_batch.py --status              # avance
+python analisis/manual_batch.py --fetch 3 --todas     # saca el siguiente lote
+python analisis/manual_batch.py --write lote.json     # valida y escribe
 ```
 
 Formato de `lote.json`:

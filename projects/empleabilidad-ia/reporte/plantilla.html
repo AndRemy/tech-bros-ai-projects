@@ -1,0 +1,1172 @@
+<!DOCTYPE html>
+<html lang="es-PE">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IA en el mercado laboral peruano — Reporte 2026</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+<style>
+  :root{
+    --bg:#f7f7f5; --surface:#ffffff; --surface-2:#f1f0ec; --border:#e2e0d8;
+    --text:#22201c; --text-2:#5c584f; --text-3:#8a8579;
+    --accent:#b5472b; --accent-2:#2f6f5e; --accent-3:#8a5a2b;
+    --warn-bg:#fbeee3; --warn-border:#e3b98a; --warn-text:#6b4222;
+    --chart-1:#b5472b; --chart-2:#2f6f5e; --chart-3:#8a5a2b; --chart-4:#4a6fa5;
+    --chart-5:#8a5a8a; --chart-6:#5c8a3a; --chart-7:#b58a2b; --chart-8:#6b6b6b;
+    --shadow: 0 1px 2px rgba(30,28,24,0.06), 0 1px 8px rgba(30,28,24,0.04);
+    --radius: 10px;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --bg:#1a1815; --surface:#231f1a; --surface-2:#2b2620; --border:#3a352c;
+      --text:#efece5; --text-2:#c7c1b4; --text-3:#8f8878;
+      --accent:#e08462; --accent-2:#5fae97; --accent-3:#c99a5c;
+      --warn-bg:#3a2a1c; --warn-border:#7a5a34; --warn-text:#f0d3ae;
+      --chart-1:#e08462; --chart-2:#5fae97; --chart-3:#c99a5c; --chart-4:#8aa9d6;
+      --chart-5:#c391c3; --chart-6:#9bc97a; --chart-7:#d6b866; --chart-8:#a8a196;
+      --shadow: 0 1px 2px rgba(0,0,0,0.3), 0 1px 8px rgba(0,0,0,0.25);
+    }
+  }
+  :root[data-theme="dark"]{
+    --bg:#1a1815; --surface:#231f1a; --surface-2:#2b2620; --border:#3a352c;
+    --text:#efece5; --text-2:#c7c1b4; --text-3:#8f8878;
+    --accent:#e08462; --accent-2:#5fae97; --accent-3:#c99a5c;
+    --warn-bg:#3a2a1c; --warn-border:#7a5a34; --warn-text:#f0d3ae;
+    --chart-1:#e08462; --chart-2:#5fae97; --chart-3:#c99a5c; --chart-4:#8aa9d6;
+    --chart-5:#c391c3; --chart-6:#9bc97a; --chart-7:#d6b866; --chart-8:#a8a196;
+    --shadow: 0 1px 2px rgba(0,0,0,0.3), 0 1px 8px rgba(0,0,0,0.25);
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0; background:var(--bg); color:var(--text);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    line-height:1.5;
+  }
+  .wrap{max-width:1180px; margin:0 auto; padding:0 20px 60px;}
+  header.top{padding:28px 20px 18px; max-width:1180px; margin:0 auto;}
+  h1{font-size:1.7rem; margin:0 0 4px; letter-spacing:-0.01em;}
+  .subtitle{color:var(--text-2); font-size:0.95rem; margin:0;}
+
+  .banner{
+    background:var(--warn-bg); border:1px solid var(--warn-border); color:var(--warn-text);
+    border-radius:var(--radius); padding:14px 18px; margin:0 0 22px; font-size:0.88rem;
+    position:sticky; top:8px; z-index:50; box-shadow:var(--shadow);
+  }
+  .banner b{font-weight:700;}
+
+  .filters{
+    background:var(--surface); border:1px solid var(--border); border-radius:var(--radius);
+    padding:16px 18px; margin-bottom:26px; display:flex; flex-wrap:wrap; gap:14px 22px;
+    align-items:flex-end; box-shadow:var(--shadow);
+  }
+  .filter-field{display:flex; flex-direction:column; gap:4px; min-width:150px;}
+  .filter-field label{font-size:0.72rem; text-transform:uppercase; letter-spacing:0.04em; color:var(--text-3); font-weight:600;}
+  select{
+    background:var(--surface-2); color:var(--text); border:1px solid var(--border);
+    border-radius:7px; padding:7px 10px; font-size:0.86rem; min-width:150px;
+  }
+  .filter-count{margin-left:auto; font-size:0.85rem; color:var(--text-2); align-self:center;}
+  .filter-count b{color:var(--text); font-size:1.05rem;}
+  .reset-btn{
+    background:transparent; border:1px solid var(--border); color:var(--text-2);
+    border-radius:7px; padding:7px 12px; font-size:0.82rem; cursor:pointer;
+  }
+  .reset-btn:hover{border-color:var(--accent); color:var(--accent);}
+
+  .section-tabs{display:flex; gap:8px; margin-bottom:22px; border-bottom:1px solid var(--border);}
+  .tab-btn{
+    background:none; border:none; padding:10px 6px; font-size:1rem; font-weight:600;
+    color:var(--text-3); cursor:pointer; border-bottom:2px solid transparent; margin-bottom:-1px;
+  }
+  .tab-btn.active{color:var(--accent); border-bottom-color:var(--accent);}
+
+  .view{display:none;}
+  .view.active{display:block;}
+
+  .grid{display:grid; grid-template-columns:repeat(auto-fit,minmax(420px,1fr)); gap:18px; margin-bottom:18px;}
+  .grid.full{grid-template-columns:1fr;}
+  .card{
+    background:var(--surface); border:1px solid var(--border); border-radius:var(--radius);
+    padding:18px 20px; box-shadow:var(--shadow);
+  }
+  .card h3{margin:0 0 2px; font-size:1rem;}
+  .card .meta{color:var(--text-3); font-size:0.78rem; margin:0 0 12px;}
+  .card canvas{max-height:320px;}
+  .reading{
+    margin:12px 0 0; padding:9px 12px; background:var(--surface-2); border-radius:7px;
+    font-size:0.85rem; color:var(--text-2); border-left:3px solid var(--accent-2);
+  }
+  .reading b{color:var(--text);}
+
+  .section-note{
+    margin:0 0 18px; padding:10px 14px; background:var(--surface); border:1px solid var(--border);
+    border-left:3px solid var(--accent-3); border-radius:7px; font-size:0.84rem; color:var(--text-2);
+  }
+  .section-note b{color:var(--text);}
+
+  .low-n-badge{
+    display:inline-block; margin-left:8px; padding:2px 8px; border-radius:20px; font-size:0.68rem;
+    font-weight:700; text-transform:uppercase; letter-spacing:0.02em; vertical-align:middle;
+    background:var(--warn-bg); border:1px solid var(--warn-border); color:var(--warn-text);
+  }
+  .card.low-n{ border-color:var(--warn-border); }
+  .low-n-note{
+    margin:8px 0 0; padding:7px 10px; border-radius:7px; font-size:0.78rem;
+    background:var(--warn-bg); border:1px solid var(--warn-border); color:var(--warn-text);
+  }
+  tr.low-n td{ color:var(--text-3); }
+  tr.low-n td:first-child::after{
+    content:" ⚠"; font-size:0.75em;
+  }
+
+  .stat-row{display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:12px; margin-bottom:18px;}
+  .stat{background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:14px 16px; box-shadow:var(--shadow);}
+  .stat .num{font-size:1.5rem; font-weight:700; color:var(--accent);}
+  .stat .lbl{font-size:0.76rem; color:var(--text-3); text-transform:uppercase; letter-spacing:0.03em;}
+
+  table{width:100%; border-collapse:collapse; font-size:0.85rem;}
+  th,td{text-align:left; padding:7px 10px; border-bottom:1px solid var(--border);}
+  th{color:var(--text-3); font-weight:600; font-size:0.75rem; text-transform:uppercase; letter-spacing:0.03em;}
+  tr:last-child td{border-bottom:none;}
+  .tag{display:inline-block; padding:2px 8px; border-radius:20px; font-size:0.72rem; font-weight:600;}
+  .tag.uso{background:#dcebe5; color:#1e5943;}
+  .tag.tecnica{background:#e3d9ec; color:#4a2e6b;}
+  :root:not([data-theme="light"]) .tag.uso{background:#1e3a2e; color:#8fd6b8;}
+  :root:not([data-theme="light"]) .tag.tecnica{background:#332047; color:#c9a8ef;}
+
+  .note-ext{
+    margin-top:10px; padding:10px 12px; border:1px dashed var(--border); border-radius:7px;
+    font-size:0.82rem; color:var(--text-2); background:var(--surface-2);
+  }
+  .note-ext b{color:var(--accent-3);}
+
+  ol.route li, ul.route li{margin-bottom:8px;}
+
+  footer{margin-top:40px; padding-top:16px; border-top:1px solid var(--border); color:var(--text-3); font-size:0.78rem;}
+
+  @media (max-width:640px){
+    .filters{flex-direction:column; align-items:stretch;}
+    .filter-count{margin-left:0;}
+  }
+</style>
+</head>
+<body>
+
+<header class="top">
+  <h1>Inteligencia Artificial en el mercado laboral peruano</h1>
+  <p class="subtitle">Análisis de 544 avisos de empleo publicados en LinkedIn y Laborum · agosto 2026</p>
+</header>
+
+<div class="wrap">
+
+  <div class="banner">
+    ⚠️ <b>Muestra no probabilística — no representa a la población total del mercado laboral
+    peruano.</b> Los 544 avisos provienen de dos portales (LinkedIn y Laborum), sobre-representan
+    empresas formales medianas/grandes de Lima, y no cubren pymes, bolsas de trabajo internas ni
+    el sector informal. Los porcentajes describen <b>esta muestra</b>, no "el mercado peruano" en
+    general. Detalle completo de fuentes, cobertura, criterios de clasificación, calidad de la
+    data y qué NO se puede concluir con esta data en
+    <a href="#metodologia" style="color:inherit;">"Metodología y limitaciones"</a> al final del
+    reporte. El campo de sector (<code>rubro_inferido</code>) trae 94 valores distintos sin
+    consolidar en la base — para que el filtro sea usable, se agruparon los 16 sectores con más
+    avisos y el resto quedó en "Otros"; el detalle crudo sigue disponible en la base para quien lo
+    necesite.
+  </div>
+
+  <div class="filters">
+    <div class="filter-field">
+      <label for="f-sector">Sector</label>
+      <select id="f-sector"><option value="">Todos</option></select>
+    </div>
+    <div class="filter-field">
+      <label for="f-region">Región</label>
+      <select id="f-region"><option value="">Todas</option></select>
+    </div>
+    <div class="filter-field">
+      <label for="f-seniority">Seniority</label>
+      <select id="f-seniority"><option value="">Todos</option></select>
+    </div>
+    <div class="filter-field">
+      <label for="f-desde">Publicado desde</label>
+      <select id="f-desde"></select>
+    </div>
+    <div class="filter-field">
+      <label for="f-hasta">Publicado hasta</label>
+      <select id="f-hasta"></select>
+    </div>
+    <button class="reset-btn" id="reset-filters">Limpiar filtros</button>
+    <div class="filter-count"><b id="n-filtered">544</b> de 544 avisos<span id="global-low-n-badge"></span></div>
+  </div>
+
+  <div class="section-tabs">
+    <button class="tab-btn active" data-view="postulantes">Para postulantes</button>
+    <button class="tab-btn" data-view="reclutadores">Para reclutadores</button>
+  </div>
+
+  <!-- ============ VISTA POSTULANTES ============ -->
+  <div class="view active" id="view-postulantes">
+
+    <p class="section-note">
+      <b>Antes de leer las conclusiones:</b> esta vista describe qué piden los avisos de la
+      muestra, no cuánta gente los aplica ni cuántas vacantes reales existen en el país. Ver
+      <a href="#metodologia" style="color:inherit;">metodología y limitaciones</a> para los
+      sesgos de portal, región y ventana temporal antes de generalizar cualquier cifra.
+    </p>
+
+    <div class="grid">
+      <div class="card">
+        <h3>Habilidades más solicitadas</h3>
+        <p class="meta" id="meta-skills">n = 544 avisos</p>
+        <canvas id="chart-skills"></canvas>
+        <p class="reading" id="reading-skills"></p>
+      </div>
+      <div class="card">
+        <h3>Habilidades de IA: uso vs. técnicas</h3>
+        <p class="meta" id="meta-ia-split">n = 544 avisos</p>
+        <canvas id="chart-ia-split"></canvas>
+        <p class="reading" id="reading-ia-split"></p>
+        <p class="reading">
+          <b>Cómo se clasifica:</b> "De uso" = herramientas de interacción directa
+          (ChatGPT, Claude, Gemini, Copilot, Prompt Engineering, "IA Generativa" genérica).
+          "Técnicas" = todo lo demás dentro de los dominios estrictos de IA (Generative AI,
+          AI Agents, Machine Learning, Deep Learning, NLP, Computer Vision, MLOps): RAG,
+          LangChain, LLMs, embeddings, frameworks de ML/DL, MLOps. Es una clasificación
+          basada en reglas explícitas, no en un juicio subjetivo caso por caso.
+        </p>
+      </div>
+    </div>
+
+    <div class="grid">
+      <div class="card">
+        <h3>Dominios de IA en la demanda</h3>
+        <p class="meta" id="meta-domains">n = 544 avisos</p>
+        <canvas id="chart-domains"></canvas>
+        <p class="reading" id="reading-domains"></p>
+      </div>
+      <div class="card">
+        <h3>Intensidad de IA por aviso</h3>
+        <p class="meta" id="meta-tipo">n = 544 avisos</p>
+        <canvas id="chart-tipo"></canvas>
+        <p class="reading" id="reading-tipo"></p>
+        <p class="reading">
+          <b>Criterio de clasificación</b> (heredado del pipeline de análisis, ver
+          <code>docs/HALLAZGOS.md</code>): <b>"Puesto de IA"</b> = el rol nació con la IA como
+          razón de ser (ML Engineer, Data Scientist, AI Product Manager…). <b>"Tradicional que
+          pide IA"</b> = un puesto que existía antes de la ola de IA y ahora la exige como
+          requisito adicional (ej. Analista Comercial al que piden ChatGPT).
+          <b>"Datos sin IA"</b> = analítica/datos sin mención de IA. <b>"Sin IA ni datos"</b> =
+          ninguno de los anteriores. Sumar los dos primeros grupos y llamarlo "% de IA" sería
+          engañoso: mezcla creación de empleo con transformación de empleo existente.
+        </p>
+      </div>
+    </div>
+
+    <div class="grid">
+      <div class="card">
+        <h3>Formación solicitada — nivel de estudios</h3>
+        <p class="meta" id="meta-nivel-estudio">n = registros de estudios asociados a avisos filtrados</p>
+        <canvas id="chart-nivel-estudio"></canvas>
+        <p class="reading" id="reading-nivel-estudio"></p>
+      </div>
+      <div class="card">
+        <h3>Formación solicitada — carreras / especialidad</h3>
+        <p class="meta" id="meta-carreras">n = registros de estudios asociados a avisos filtrados</p>
+        <canvas id="chart-carreras"></canvas>
+        <p class="reading" id="reading-carreras"></p>
+        <p class="reading">
+          No hay campo de "años de experiencia" estructurado en la base — no se puede reportar
+          un promedio de años exigidos sin inventar el dato. Tampoco hay campo de certificaciones
+          específicas; si un aviso las menciona, queda solo dentro del texto libre de la
+          descripción, no como dato estructurado.
+        </p>
+      </div>
+    </div>
+
+    <div class="grid full">
+      <div class="card">
+        <h3>Co-ocurrencia de habilidades</h3>
+        <p class="meta" id="meta-cooc">Pares de habilidades que más aparecen juntas en el mismo aviso, sobre avisos filtrados</p>
+        <div id="cooc-table"></div>
+        <p class="reading">
+          Cada fila cuenta avisos donde <b>ambas</b> habilidades aparecen juntas — no implica que
+          una requiera a la otra, solo que suelen pedirse combinadas en el mismo aviso.
+        </p>
+      </div>
+    </div>
+
+    <div class="grid full">
+      <div class="card">
+        <h3>Ruta de preparación (derivada de la data)</h3>
+        <p class="meta" id="meta-route">Construida a partir de la frecuencia real de habilidades en avisos filtrados, no de una opinión externa</p>
+        <div id="route-content"></div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ============ VISTA RECLUTADORES ============ -->
+  <div class="view" id="view-reclutadores">
+
+    <p class="section-note">
+      <b>Antes de leer las conclusiones:</b> "dificultad de cobertura" aquí es un proxy indirecto
+      (días activos y republicaciones), no un dato de contratación real, y los salarios se
+      declaran en solo 4.2% de los avisos. Ver
+      <a href="#metodologia" style="color:inherit;">metodología y limitaciones</a> para el detalle
+      de cada proxy antes de usar estas cifras en una decisión.
+    </p>
+
+    <div class="stat-row" id="stat-row-recruit"></div>
+
+    <div class="grid">
+      <div class="card">
+        <h3>Días activos por sector (proxy de dificultad de cobertura)</h3>
+        <p class="meta" id="meta-dias-sector">n = 544 avisos</p>
+        <canvas id="chart-dias-sector"></canvas>
+        <p class="reading" id="reading-dias-sector"></p>
+        <p class="reading">
+          <b>Limitación:</b> <code>dias_activos</code> mide cuánto llevaba publicado el aviso
+          hasta el momento del scraping (agosto 2026), no el ciclo completo de vida de la
+          vacante — un aviso puede seguir abierto después de la captura. Es un proxy parcial de
+          dificultad, no una medición directa de tiempo-para-contratar.
+        </p>
+      </div>
+      <div class="card">
+        <h3>Republicaciones por puesto + empresa</h3>
+        <p class="meta" id="meta-repub">avisos que aparecen más de una vez con el mismo título y empresa, sobre avisos filtrados</p>
+        <div id="repub-table"></div>
+        <p class="reading">
+          <b>Limitación:</b> una republicación puede reflejar dificultad real para cubrir la
+          vacante, o simplemente la práctica de la empresa de repostear periódicamente para
+          mantener visibilidad. La deduplicación entre portales tampoco es perfecta (ver
+          <code>docs/DECISIONES.md</code>), así que este número es indicativo, no definitivo.
+        </p>
+      </div>
+    </div>
+
+    <div class="grid">
+      <div class="card">
+        <h3>Concentración por sector</h3>
+        <p class="meta" id="meta-sector-concentracion">n = avisos filtrados</p>
+        <canvas id="chart-sector-concentracion"></canvas>
+        <p class="reading" id="reading-sector-concentracion"></p>
+      </div>
+      <div class="card">
+        <h3>Empresas con más avisos publicados</h3>
+        <p class="meta" id="meta-empresas">n = 544 avisos</p>
+        <canvas id="chart-empresas"></canvas>
+        <p class="reading" id="reading-empresas"></p>
+        <p class="reading">
+          Un volumen alto de una sola empresa no equivale a demanda del "mercado peruano" en
+          sentido amplio: puede reflejar el volumen de contratación de una sola compañía (ej. una
+          consultora de staffing con presencia regional) en vez de una tendencia del mercado.
+        </p>
+      </div>
+    </div>
+
+    <div class="grid">
+      <div class="card">
+        <h3>Modalidad de trabajo</h3>
+        <p class="meta" id="meta-modalidad">n = avisos filtrados</p>
+        <canvas id="chart-modalidad"></canvas>
+        <p class="reading" id="reading-modalidad"></p>
+      </div>
+      <div class="card">
+        <h3>Región</h3>
+        <p class="meta" id="meta-region">n = avisos filtrados</p>
+        <canvas id="chart-region"></canvas>
+        <p class="reading" id="reading-region"></p>
+      </div>
+    </div>
+
+    <div class="grid">
+      <div class="card">
+        <h3>Rangos salariales declarados (PEN mensual)</h3>
+        <p class="meta" id="meta-salario">solo avisos que declaran salario, sobre avisos filtrados</p>
+        <canvas id="chart-salario"></canvas>
+        <p class="reading" id="reading-salario"></p>
+      </div>
+      <div class="card">
+        <h3>Habilidades más frecuentes en avisos que quedan abiertos más tiempo</h3>
+        <p class="meta" id="meta-req-abiertos">compara el 25% de avisos con más días activos contra el resto, sobre avisos filtrados con dato de días activos</p>
+        <div id="req-abiertos-table"></div>
+        <p class="reading">
+          Una habilidad que aparece más en el grupo "abierto más tiempo" no prueba causalidad
+          (podría ser un perfil más senior, más escaso, o simplemente coincidencia en una muestra
+          de este tamaño); se reporta como asociación, no como diagnóstico.
+        </p>
+      </div>
+    </div>
+
+  </div>
+
+  <section class="card" id="metodologia" style="margin-top:8px;">
+    <h2 style="margin-top:0;">Metodología y limitaciones</h2>
+
+    <h3>1. Fuentes</h3>
+    <ul>
+      <li><b>LinkedIn</b> — 432 avisos (79.4% del corpus). Scrapeado vía el actor de Apify
+        <code>curious_coder/linkedin-jobs-scraper</code>, con 15 keywords (7 en español, 8 en
+        inglés). Costo: ~US$0.85 por keyword (20 resultados).</li>
+      <li><b>Laborum</b> — 112 avisos (20.6% del corpus). Scraping propio y gratuito
+        (<code>scraper_laborum_dirigido.py</code>), 22 keywords de IA/datos, parseando el estado
+        de Apollo serializado en el HTML de <code>/search-jobs?q=</code>.</li>
+      <li>Se evaluó y <b>descartó</b> Get on Board: de 752 ofertas escaneadas, 357 eran de Chile y
+        solo 15 de Perú (~6 de IA/datos) — volumen insuficiente para el estudio.</li>
+    </ul>
+
+    <h3>2. Cobertura</h3>
+    <table>
+      <tbody>
+        <tr><td>Avisos en el corpus final</td><td><b>544</b></td></tr>
+        <tr><td>Empresas distintas</td><td><b>269</b></td></tr>
+        <tr><td>Por portal</td><td>LinkedIn 432 (79.4%) · Laborum 112 (20.6%)</td></tr>
+        <tr><td>Rango de <code>fecha_publicacion</code> de los avisos</td><td>31/01/2025 – 14/08/2026</td></tr>
+        <tr><td>Ventana en que se ejecutó el scraping (<code>scraped_at</code>)</td><td>13/08/2026 – 14/08/2026</td></tr>
+        <tr><td>Por región</td><td>Lima 375 (68.9%) · Provincia 42 (7.7%) · No especificado 127 (23.3%)</td></tr>
+        <tr><td>Sectores distintos en <code>rubro_inferido</code> (crudo)</td><td>94 — agrupados a 16 + "Otros" para el reporte, ver banner superior</td></tr>
+      </tbody>
+    </table>
+    <p class="reading">
+      <b>Avisos únicos tras deduplicar: no disponible como conteo exacto.</b> La base viva ya
+      refleja el corpus post-limpieza (544 filas en <code>raw_ofertas</code>); el número de filas
+      scrapeadas antes de <code>dedup_contenido.py</code> no quedó persistido en ninguna tabla, así
+      que no se puede reportar sin inventarlo. Lo que sí está documentado
+      (<code>docs/DECISIONES.md</code>): la corrida de deduplicación eliminó, entre otros casos, 65
+      filas sobrantes de una sola empresa (FullStack, el mismo aviso republicado 11-12 veces bajo
+      IDs distintos de LinkedIn).
+    </p>
+    <p class="reading">
+      La fecha de scraping (13-14/08/2026) es una <b>ventana de captura de un día</b>, no el
+      periodo que cubre el estudio: los portales muestran avisos que llevan activos desde meses
+      atrás. El corpus es una <b>foto acumulada de avisos vigentes en ese momento</b>, no una serie
+      con muestreo continuo en el tiempo.
+    </p>
+
+    <h3>3. Criterios de clasificación</h3>
+    <p><b>Intensidad de IA por aviso (<code>tipo_oferta</code>, ver <code>clasificar_ofertas.py</code>).</b>
+      Se evalúa en este orden y el primer criterio que aplica decide:</p>
+    <ol>
+      <li>Si el <b>título</b> del aviso matchea un patrón de IA (menciona "IA"/"AI" como palabra
+        suelta, "inteligencia artificial", "machine learning", "deep learning", "data scien-",
+        "computer vision", "prompt engineer", "mlops", "generativ-", "agente(s) de ia", etc.) →
+        <b>"Puesto de IA"</b>.</li>
+      <li>Si no, pero el aviso tiene al menos una habilidad en un dominio de IA estricto
+        (Generative AI, AI Agents, Machine Learning, Deep Learning, NLP, Computer Vision, MLOps) →
+        <b>"Tradicional que pide IA"</b>.</li>
+      <li>Si no, pero tiene habilidades de dominio de datos (Data Engineering, Analytics) →
+        <b>"Datos sin IA"</b>.</li>
+      <li>Si ninguna de las anteriores → <b>"Sin IA ni datos"</b> (12 avisos, 2.2%; se deja en esta
+        categoría, no se fuerza a otra).</li>
+    </ol>
+    <p>Antes de este paso, se corrige la taxonomía: tecnología genérica que el extractor había
+      marcado como IA (ej. <code>Python</code> como "Machine Learning", <code>CI/CD</code> y
+      <code>Terraform</code> como "MLOps") se "destilda" a <code>ai_domain = 'No aplica'</code>
+      contra una lista fija de ~70 tecnologías de propósito general, para no inflar los dominios de
+      IA con lenguajes y DevOps de siempre.</p>
+
+    <p><b>Normalización de nombres de habilidades</b> (<code>consolidar_skills.py</code>): se
+      agrupan variantes de una misma habilidad por mayúsculas/puntuación
+      (<code>Git</code>/<code>GIT</code>), pares español-inglés de una tabla fija de sinónimos
+      (<code>English</code>→<code>Inglés</code>) y calificadores de nivel
+      (<code>SQL Avanzado</code>→<code>SQL</code>). Cuando dos variantes tienen
+      <code>ai_domain</code> contradictorio (ej. Power BI marcado como "Analytics" en una oferta y
+      "No aplica" en otra), gana el dominio con más votos ponderados por uso, prefiriendo cualquier
+      dominio real sobre "No aplica".</p>
+
+    <p><b>Nivel de puesto</b> (<code>nivel_desde_titulo.py</code>): se deriva del título con reglas
+      deterministas, no del LLM. Primero se busca una palabra de jerarquía (Dirección > Gerencia >
+      Jefatura > Practicante > Asistente > Analista > Especialista, en ese orden de precedencia);
+      si no hay, se busca una marca de seniority ("jr", "sr", "senior"). <b>Si el título no da
+      ninguna señal, se respeta el nivel que había inferido el LLM</b> — el regex solo pisa la
+      inferencia del modelo cuando hay evidencia textual explícita.</p>
+
+    <h3>4. Calidad de la data</h3>
+    <p>% de nulos o "No especificado" en los campos clave, sobre las 544 filas del corpus:</p>
+    <table>
+      <thead><tr><th>Campo</th><th>Sin dato</th><th>%</th><th>Cómo se manejó</th></tr></thead>
+      <tbody>
+        <tr><td>Salario (<code>salary_min</code>/<code>salary_max</code>)</td><td>521 / 544</td><td>95.8%</td><td>No se imputa; el reporte muestra el 4.2% que sí declara y evita promediar sobre una base tan chica.</td></tr>
+        <tr><td>Ciudad (<code>ciudad</code> vacía o "No especificado")</td><td>120 / 544</td><td>22.1%</td><td>Se agrupa como región "No especificado", no se asume Lima ni ninguna otra ciudad.</td></tr>
+        <tr><td>Modalidad de trabajo</td><td>247 / 544</td><td>45.4%</td><td>Queda como "No especificado" en el gráfico de modalidad; no se infiere del sector ni del título.</td></tr>
+        <tr><td>Nivel de puesto (<code>nivel_puesto</code>)</td><td>28 / 544</td><td>5.1%</td><td>Título sin señal de jerarquía/seniority y sin valor utilizable del LLM; se deja como "No especificado".</td></tr>
+        <tr><td>Fecha de publicación (<code>fecha_publicacion</code>)</td><td>0 / 544</td><td>0.0%</td><td>Campo completo en el corpus actual.</td></tr>
+        <tr><td>Sector (<code>rubro_inferido</code>)</td><td>0 / 544</td><td>0.0%</td><td>Sin nulos, pero con 94 valores sin consolidar del todo (mezcla español/inglés); se agrupó para el reporte, ver sección 2.</td></tr>
+      </tbody>
+    </table>
+
+    <h3>5. Sesgos conocidos</h3>
+    <ul>
+      <li><b>Sesgo de plataforma.</b> 79.4% del corpus viene de LinkedIn, que sobre-representa
+        empresas formales medianas/grandes; ni LinkedIn ni Laborum capturan bolsas de trabajo
+        internas, referidos o portales de nicho.</li>
+      <li><b>Sobrerrepresentación de Lima.</b> 68.9% de los avisos con ciudad identificable son de
+        Lima, contra 7.7% de provincia reconocible (el resto, 23.3%, no especifica ciudad).</li>
+      <li><b>Sesgo hacia el sector formal y avisos en línea.</b> Pymes, bodegas y contratación
+        informal no publican en estos portales — quedan fuera de la muestra por diseño, no por
+        filtro.</li>
+      <li><b>Ventana temporal corta de captura.</b> El scraping se ejecutó en 1 día (13-14/08/2026).
+        Es una foto de avisos activos en ese momento, no un panel con observaciones repetidas en el
+        tiempo — no permite medir tendencia.</li>
+      <li><b>Sesgo de idioma en la búsqueda inicial.</b> Las primeras búsquedas en LinkedIn fueron
+        en inglés, lo que sobre-representó consultoras de staffing regional (BairesDev, FullStack)
+        hasta que se agregaron 6 búsquedas en español que trajeron mercado local (BCP, Interbank,
+        Yape, BBVA, Sodimac, Entel).</li>
+      <li><b>Huecos de keywords por presupuesto agotado.</b> Las búsquedas
+        <code>Computer Vision Engineer</code>, <code>NLP Engineer</code>,
+        <code>Prompt Engineer</code>, <code>LLM Engineer</code> y <code>AI Product Manager</code>
+        nunca se ejecutaron porque se agotó el crédito de Apify — Computer Vision (2.7%) y NLP
+        (8.6%) están subrepresentados por esto, no necesariamente porque no exista demanda.</li>
+    </ul>
+
+    <h3>6. Qué NO se puede concluir con esta data</h3>
+    <p>Lecturas que un lector podría sacar del reporte y que <b>no están respaldadas</b> por el
+      diseño de esta muestra:</p>
+    <ol>
+      <li><b>"El X% del mercado laboral peruano requiere IA."</b> El corpus es una muestra de
+        avisos publicados en dos portales, no una muestra probabilística ni un censo del mercado
+        laboral peruano. Los porcentajes describen la muestra, no la población.</li>
+      <li><b>"La demanda de IA está creciendo/cayendo en Perú."</b> No hay serie histórica: es una
+        foto de avisos activos capturados en un día. Sin observaciones repetidas en el tiempo, no
+        se puede afirmar tendencia en ninguna dirección.</li>
+      <li><b>"Los sueldos de los perfiles de IA en Perú están en tal rango."</b> Solo 23 de 544
+        avisos (4.2%) declaran salario — insuficiente para generalizar por sector, seniority o
+        dominio de IA sin engañar con un promedio que no es representativo.</li>
+      <li><b>"Perú casi no demanda Computer Vision o NLP."</b> Esos dominios aparecen poco porque
+        las keywords de búsqueda correspondientes nunca se ejecutaron (crédito agotado de Apify),
+        no porque se haya medido y confirmado baja demanda.</li>
+      <li><b>"Las empresas fuera de Lima casi no piden IA."</b> El 22.1% de avisos sin ciudad
+        utilizable, sumado al sesgo de portal hacia empresas formales de Lima, puede estar
+        ocultando demanda real de provincia en vez de reflejar su ausencia.</li>
+    </ol>
+  </section>
+
+  <footer>
+    Fuente: scraping propio de LinkedIn y Laborum, procesado con clasificación asistida por LLM
+    y reglas deterministas (ver <code>docs/PIPELINE.md</code>, <code>docs/DECISIONES.md</code>).
+    Corpus: 544 avisos · 269 empresas · capturado en agosto de 2026. Reporte generado para uso
+    interno de análisis, no es un estudio con muestreo probabilístico.
+  </footer>
+
+</div>
+
+<script>
+const DATA = __DATA_JSON__;
+
+const AI_STRICT_DOMAINS = ['Generative AI','AI Agents','Machine Learning','Deep Learning','NLP','Computer Vision','MLOps'];
+const USO_SKILLS = new Set(['ChatGPT','Claude','Gemini','Copilot','Microsoft Copilot','GitHub Copilot',
+  'Prompt Engineering','IA Generativa','Inteligencia Artificial','Herramientas No-Code','Midjourney','DALL-E']);
+
+const PALETTE = ['--chart-1','--chart-2','--chart-3','--chart-4','--chart-5','--chart-6','--chart-7','--chart-8']
+  .map(v => getComputedStyle(document.documentElement).getPropertyValue(v).trim());
+
+function cssVar(name){ return getComputedStyle(document.documentElement).getPropertyValue(name).trim(); }
+
+Chart.defaults.font.family = "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif";
+Chart.defaults.color = cssVar('--text-2');
+Chart.defaults.borderColor = cssVar('--border');
+
+// ---------- filtros ----------
+const state = { sector:'', region:'', seniority:'', desde:'', hasta:'' };
+
+function uniqueSorted(arr){ return [...new Set(arr)].filter(Boolean).sort(); }
+
+function populateSelect(id, values, current){
+  const sel = document.getElementById(id);
+  values.forEach(v => {
+    const opt = document.createElement('option');
+    opt.value = v; opt.textContent = v;
+    sel.appendChild(opt);
+  });
+}
+
+const sectorCounts = {};
+DATA.forEach(r => { sectorCounts[r.sector] = (sectorCounts[r.sector]||0)+1; });
+const topSectors = Object.entries(sectorCounts).sort((a,b)=>b[1]-a[1]).map(e=>e[0]);
+['Otros','No especificado'].forEach(k => {
+  const i = topSectors.indexOf(k);
+  if(i >= 0) topSectors.splice(i,1);
+});
+if(sectorCounts['Otros']!==undefined) topSectors.push('Otros');
+if(sectorCounts['No especificado']!==undefined) topSectors.push('No especificado');
+const regions = uniqueSorted(DATA.map(r=>r.region));
+const seniorities = ['Direccion','Gerencia','Jefatura','Especialista','Analista','Asistente','Practicante','No especificado'].filter(s => DATA.some(r=>r.seniority===s));
+const periods = uniqueSorted(DATA.map(r=>r.periodo));
+
+populateSelect('f-sector', topSectors);
+populateSelect('f-region', regions);
+populateSelect('f-seniority', seniorities);
+populateSelect('f-desde', periods);
+populateSelect('f-hasta', periods);
+document.getElementById('f-hasta').value = periods[periods.length-1] || '';
+
+['f-sector','f-region','f-seniority','f-desde','f-hasta'].forEach(id=>{
+  document.getElementById(id).addEventListener('change', onFilterChange);
+});
+document.getElementById('reset-filters').addEventListener('click', () => {
+  ['f-sector','f-region','f-seniority','f-desde'].forEach(id => document.getElementById(id).value='');
+  document.getElementById('f-hasta').value = periods[periods.length-1] || '';
+  onFilterChange();
+});
+
+document.querySelectorAll('.tab-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+    document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('view-'+btn.dataset.view).classList.add('active');
+  });
+});
+
+function onFilterChange(){
+  state.sector = document.getElementById('f-sector').value;
+  state.region = document.getElementById('f-region').value;
+  state.seniority = document.getElementById('f-seniority').value;
+  state.desde = document.getElementById('f-desde').value;
+  state.hasta = document.getElementById('f-hasta').value;
+  render();
+}
+
+function getFiltered(){
+  return DATA.filter(r => {
+    if(state.sector && r.sector !== state.sector) return false;
+    if(state.region && r.region !== state.region) return false;
+    if(state.seniority && r.seniority !== state.seniority) return false;
+    if(state.desde && (!r.periodo || r.periodo < state.desde)) return false;
+    if(state.hasta && (!r.periodo || r.periodo > state.hasta)) return false;
+    return true;
+  });
+}
+
+// ---------- helpers ----------
+function countBy(records, fn){
+  const m = {};
+  records.forEach(r => { const k = fn(r); if(k===undefined||k===null||k==='') return; m[k]=(m[k]||0)+1; });
+  return m;
+}
+function topN(obj, n){
+  return Object.entries(obj).sort((a,b)=>b[1]-a[1]).slice(0,n);
+}
+function pct(n, total){ return total ? (100*n/total).toFixed(1) : '0.0'; }
+
+const charts = {};
+function upsertChart(id, config){
+  if(charts[id]) charts[id].destroy();
+  charts[id] = new Chart(document.getElementById(id).getContext('2d'), config);
+}
+
+function baseBarOptions(horizontal){
+  return {
+    indexAxis: horizontal ? 'y' : 'x',
+    responsive:true,
+    maintainAspectRatio:false,
+    plugins:{ legend:{ display:false } },
+    scales:{
+      x:{ grid:{ color: cssVar('--border') }, ticks:{ color: cssVar('--text-2') } },
+      y:{ grid:{ color: cssVar('--border') }, ticks:{ color: cssVar('--text-2') } }
+    }
+  };
+}
+function basePieOptions(){
+  return {
+    responsive:true, maintainAspectRatio:false,
+    plugins:{ legend:{ position:'right', labels:{ color: cssVar('--text-2'), boxWidth:12, padding:10 } } }
+  };
+}
+
+// ---------- n < 30 = poco confiable ----------
+const N_MIN = 30;
+
+function updateGlobalLowN(n){
+  const el = document.getElementById('global-low-n-badge');
+  if(!el) return;
+  el.innerHTML = n < N_MIN
+    ? `<span class="low-n-badge">n=${n} &lt; 30 · muestra poco confiable</span>`
+    : '';
+}
+
+function cardOf(canvasId){
+  const el = document.getElementById(canvasId);
+  return el ? el.closest('.card') : null;
+}
+
+// Marca la tarjeta completa como poco confiable (para gráficos donde TODO el
+// corte, no una barra individual, tiene n < 30 — ej. salario declarado).
+function markCardLowN(canvasId, n){
+  const card = cardOf(canvasId);
+  if(!card) return;
+  card.classList.toggle('low-n', n < N_MIN);
+  let badge = card.querySelector(':scope > h3 > .low-n-badge');
+  if(n < N_MIN){
+    if(!badge){
+      badge = document.createElement('span');
+      badge.className = 'low-n-badge';
+      card.querySelector('h3').appendChild(badge);
+    }
+    badge.textContent = `n=${n} · poco confiable`;
+  } else if(badge){
+    badge.remove();
+  }
+}
+
+// Colorea de gris/ámbar las barras individuales cuyo conteo es < 30, dejando
+// el color normal para las que sí alcanzan el mínimo.
+function lowNBarColors(counts, baseColor){
+  const warn = cssVar('--warn-border');
+  return counts.map(n => n < N_MIN ? warn : baseColor);
+}
+
+// Callback de tooltip que siempre expone el n exacto de la barra/slice y
+// advierte cuando es menor al mínimo.
+function lowNAfterLabel(counts){
+  return (ctx) => {
+    const n = counts[ctx.dataIndex];
+    return n < N_MIN ? `⚠ n=${n} (<30) — poco confiable` : `n=${n}`;
+  };
+}
+
+// Igual que lowNBarColors pero para el borde de slices de pie/doughnut.
+function lowNBorderColors(counts, baseColors){
+  const warn = cssVar('--warn-border');
+  return counts.map((n, i) => n < N_MIN ? warn : baseColors[i % baseColors.length]);
+}
+
+// Marca <tr> de una tabla como poco confiables cuando su conteo es < 30.
+function trLowNClass(n){ return n < N_MIN ? ' class="low-n"' : ''; }
+
+// ---------- render ----------
+function render(){
+  const recs = getFiltered();
+  document.getElementById('n-filtered').textContent = recs.length;
+  updateGlobalLowN(recs.length);
+
+  renderSkills(recs);
+  renderIaSplit(recs);
+  renderDomains(recs);
+  renderTipo(recs);
+  renderEstudios(recs);
+  renderCooc(recs);
+  renderRoute(recs);
+
+  renderRecruitStats(recs);
+  renderDiasSector(recs);
+  renderRepub(recs);
+  renderSectorConcentracion(recs);
+  renderEmpresas(recs);
+  renderModalidad(recs);
+  renderRegion(recs);
+  renderSalario(recs);
+  renderReqAbiertos(recs);
+}
+
+function allSkills(recs){
+  const out = [];
+  recs.forEach(r => r.skills.forEach(s => out.push(s)));
+  return out;
+}
+
+function renderSkills(recs){
+  const sk = allSkills(recs);
+  const byJob = {};
+  recs.forEach(r => {
+    const seen = new Set();
+    r.skills.forEach(s => { if(!seen.has(s.skill)){ seen.add(s.skill); byJob[s.skill]=(byJob[s.skill]||0)+1; } });
+  });
+  const top = topN(byJob, 15);
+  const counts = top.map(t=>t[1]);
+  document.getElementById('meta-skills').textContent = `n = ${recs.length} avisos · % de avisos que mencionan cada habilidad`;
+  upsertChart('chart-skills', {
+    type:'bar',
+    data:{ labels: top.map(t=>t[0]), datasets:[{ data: counts, backgroundColor: lowNBarColors(counts, cssVar('--chart-1')) }] },
+    options: { ...baseBarOptions(true),
+      plugins:{ legend:{display:false}, tooltip:{ callbacks:{
+        label: c => `${c.raw} avisos (${pct(c.raw, recs.length)}%)`,
+        afterLabel: lowNAfterLabel(counts)
+      } } }
+    }
+  });
+  const [first, second] = top;
+  document.getElementById('reading-skills').innerHTML = first
+    ? `<b>${first[0]}</b> es la habilidad más pedida (${pct(first[1],recs.length)}% de los avisos)${second ? `, seguida de <b>${second[0]}</b> (${pct(second[1],recs.length)}%)`:''}.`
+    : 'No hay avisos con los filtros actuales.';
+}
+
+function renderIaSplit(recs){
+  const jobsWithUso = new Set(), jobsWithTecnica = new Set();
+  const usoCounts = {}, tecCounts = {};
+  recs.forEach(r => {
+    r.skills.forEach(s => {
+      if(!AI_STRICT_DOMAINS.includes(s.ai_domain)) return;
+      if(USO_SKILLS.has(s.skill)){ jobsWithUso.add(r.raw_id); usoCounts[s.skill]=(usoCounts[s.skill]||0)+1; }
+      else { jobsWithTecnica.add(r.raw_id); tecCounts[s.skill]=(tecCounts[s.skill]||0)+1; }
+    });
+  });
+  const rawCounts = [jobsWithUso.size, jobsWithTecnica.size];
+  document.getElementById('meta-ia-split').textContent = `n = ${recs.length} avisos · % que piden al menos una habilidad de IA de cada tipo`;
+  upsertChart('chart-ia-split', {
+    type:'bar',
+    data:{
+      labels:['De uso (prompting, copilots)', 'Técnicas (ML, RAG, MLOps…)'],
+      datasets:[{ data:[pct(jobsWithUso.size,recs.length), pct(jobsWithTecnica.size,recs.length)],
+        backgroundColor: lowNBarColors(rawCounts, cssVar('--chart-2')) }]
+    },
+    options:{ ...baseBarOptions(true),
+      plugins:{ legend:{display:false}, tooltip:{ callbacks:{
+        label:c=>`${c.raw}% de los avisos`,
+        afterLabel: lowNAfterLabel(rawCounts)
+      } } },
+      scales:{ x:{ max:100, grid:{color:cssVar('--border')}, ticks:{color:cssVar('--text-2')} }, y:{ grid:{color:cssVar('--border')}, ticks:{color:cssVar('--text-2')} } }
+    }
+  });
+  document.getElementById('reading-ia-split').innerHTML = recs.length
+    ? `${pct(jobsWithUso.size,recs.length)}% de los avisos filtrados piden al menos una habilidad de IA <b>de uso</b>
+       (n=${jobsWithUso.size}) y ${pct(jobsWithTecnica.size,recs.length)}% piden al menos una <b>técnica</b>
+       (n=${jobsWithTecnica.size}); un mismo aviso puede caer en ambos grupos.`
+    : 'No hay avisos con los filtros actuales.';
+}
+
+function renderDomains(recs){
+  const byDomain = {};
+  recs.forEach(r => {
+    const seen = new Set();
+    r.skills.forEach(s => {
+      if(s.ai_domain==='No aplica' || seen.has(s.ai_domain)) return;
+      seen.add(s.ai_domain); byDomain[s.ai_domain]=(byDomain[s.ai_domain]||0)+1;
+    });
+  });
+  const top = topN(byDomain, 10);
+  const counts = top.map(t=>t[1]);
+  document.getElementById('meta-domains').textContent = `n = ${recs.length} avisos · % que mencionan al menos una habilidad de ese dominio`;
+  upsertChart('chart-domains', {
+    type:'bar',
+    data:{ labels: top.map(t=>t[0]), datasets:[{ data: counts, backgroundColor: lowNBarColors(counts, cssVar('--chart-4')) }] },
+    options:{ ...baseBarOptions(true), plugins:{ legend:{display:false}, tooltip:{ callbacks:{
+      label:c=>`${c.raw} avisos (${pct(c.raw,recs.length)}%)`,
+      afterLabel: lowNAfterLabel(counts)
+    } } } }
+  });
+  const [firstDom] = top;
+  document.getElementById('reading-domains').innerHTML = firstDom
+    ? `<b>${firstDom[0]}</b> es el dominio más presente (${pct(firstDom[1],recs.length)}% de ${recs.length} avisos).
+       <b>Data Engineering</b> y <b>Analytics</b> no son IA estricta — son trabajo de datos previo a la IA.
+       Para IA en sentido estricto, mira Generative AI, AI Agents, Machine Learning, Deep Learning, NLP,
+       Computer Vision y MLOps.`
+    : 'No hay avisos con los filtros actuales.';
+}
+
+function renderTipo(recs){
+  const byTipo = countBy(recs, r=>r.tipo_oferta);
+  const order = ['Puesto de IA','Tradicional que pide IA','Datos sin IA','Sin IA ni datos'].filter(k=>byTipo[k]!==undefined);
+  const counts = order.map(k=>byTipo[k]);
+  const baseColors = [cssVar('--chart-1'),cssVar('--chart-3'),cssVar('--chart-4'),cssVar('--chart-8')];
+  document.getElementById('meta-tipo').textContent = `n = ${recs.length} avisos`;
+  upsertChart('chart-tipo', {
+    type:'doughnut',
+    data:{ labels: order.map((k,i)=>`${k} (n=${counts[i]})`),
+      datasets:[{ data: counts, backgroundColor: baseColors, borderColor: lowNBorderColors(counts, baseColors), borderWidth: 2 }] },
+    options: { ...basePieOptions(), plugins:{ ...basePieOptions().plugins, tooltip:{ callbacks:{ afterLabel: lowNAfterLabel(counts) } } } }
+  });
+  const [firstTipo] = topN(byTipo, 1);
+  document.getElementById('reading-tipo').innerHTML = firstTipo
+    ? `<b>${firstTipo[0]}</b> es el tipo más común en el filtro actual (${pct(firstTipo[1],recs.length)}% de ${recs.length} avisos, n=${firstTipo[1]}).`
+    : 'No hay avisos con los filtros actuales.';
+}
+
+function renderEstudios(recs){
+  const nivelCounts = {}, carreraCounts = {};
+  let totalEstudios = 0;
+  recs.forEach(r => r.estudios.forEach(e => {
+    totalEstudios++;
+    if(e.nivel_estudio && e.nivel_estudio !== 'No especificado') nivelCounts[e.nivel_estudio]=(nivelCounts[e.nivel_estudio]||0)+1;
+    if(e.carrera && e.carrera.trim()!=='') carreraCounts[e.carrera]=(carreraCounts[e.carrera]||0)+1;
+  }));
+  const topNivel = topN(nivelCounts, 8);
+  const topCarrera = topN(carreraCounts, 12);
+  const nivelCountsArr = topNivel.map(t=>t[1]);
+  const carreraCountsArr = topCarrera.map(t=>t[1]);
+  document.getElementById('meta-nivel-estudio').textContent = `n = ${totalEstudios} menciones de nivel de estudio sobre ${recs.length} avisos filtrados`;
+  document.getElementById('meta-carreras').textContent = `n = ${totalEstudios} menciones sobre ${recs.length} avisos filtrados`;
+  upsertChart('chart-nivel-estudio', {
+    type:'bar',
+    data:{ labels: topNivel.map(t=>t[0]), datasets:[{ data: nivelCountsArr, backgroundColor: lowNBarColors(nivelCountsArr, cssVar('--chart-6')) }] },
+    options: { ...baseBarOptions(true), plugins:{ legend:{display:false}, tooltip:{ callbacks:{ afterLabel: lowNAfterLabel(nivelCountsArr) } } } }
+  });
+  upsertChart('chart-carreras', {
+    type:'bar',
+    data:{ labels: topCarrera.map(t=>t[0]), datasets:[{ data: carreraCountsArr, backgroundColor: lowNBarColors(carreraCountsArr, cssVar('--chart-7')) }] },
+    options: { ...baseBarOptions(true), plugins:{ legend:{display:false}, tooltip:{ callbacks:{ afterLabel: lowNAfterLabel(carreraCountsArr) } } } }
+  });
+  const [firstNivel] = topN(nivelCounts,1);
+  document.getElementById('reading-nivel-estudio').innerHTML = firstNivel
+    ? `<b>${firstNivel[0]}</b> es el nivel de estudio más mencionado (n=${firstNivel[1]} de ${totalEstudios}). Un mismo aviso puede aceptar varios niveles a la vez (ej. "bachiller o titulado"), por eso las menciones no suman 100%.`
+    : '';
+  const [firstCarrera] = topN(carreraCounts,1);
+  document.getElementById('reading-carreras').innerHTML = firstCarrera
+    ? `<b>${firstCarrera[0]}</b> es la carrera/especialidad más mencionada (n=${firstCarrera[1]} de ${totalEstudios} menciones).`
+    : 'No hay carreras registradas con estos filtros.';
+}
+
+function renderCooc(recs){
+  const jobSkillSets = recs.map(r => [...new Set(r.skills.map(s=>s.skill))]);
+  const singleCounts = {};
+  jobSkillSets.forEach(set => set.forEach(s => singleCounts[s]=(singleCounts[s]||0)+1));
+  const topSkills = new Set(topN(singleCounts, 20).map(t=>t[0]));
+  const pairCounts = {};
+  jobSkillSets.forEach(set => {
+    const filtered = set.filter(s=>topSkills.has(s)).sort();
+    for(let i=0;i<filtered.length;i++){
+      for(let j=i+1;j<filtered.length;j++){
+        const key = filtered[i]+' + '+filtered[j];
+        pairCounts[key]=(pairCounts[key]||0)+1;
+      }
+    }
+  });
+  const top = topN(pairCounts, 12);
+  document.getElementById('meta-cooc').textContent = `n = ${recs.length} avisos · calculado sobre las 20 habilidades más frecuentes`;
+  const rows = top.map(([pair,count]) => {
+    const [a,b] = pair.split(' + ');
+    return `<tr${trLowNClass(count)}><td>${a}</td><td>${b}</td><td>${count}</td><td>${pct(count,recs.length)}%</td></tr>`;
+  }).join('');
+  document.getElementById('cooc-table').innerHTML = top.length ? `
+    <table><thead><tr><th>Habilidad A</th><th>Habilidad B</th><th>Avisos juntas</th><th>% del total filtrado</th></tr></thead>
+    <tbody>${rows}</tbody></table>
+    ${top.some(([,c])=>c<N_MIN) ? '<p class="low-n-note">⚠ Filas marcadas con ⚠: menos de 30 avisos respaldan ese par — poco confiable.</p>' : ''}`
+    : '<p class="meta">Sin datos suficientes con estos filtros.</p>';
+}
+
+function renderRoute(recs){
+  const iaJobs = recs.filter(r => r.tipo_oferta === 'Puesto de IA');
+  const usoCounts = {}, tecCounts = {};
+  iaJobs.forEach(r => {
+    const seen = new Set();
+    r.skills.forEach(s => {
+      if(!AI_STRICT_DOMAINS.includes(s.ai_domain) || seen.has(s.skill)) return;
+      seen.add(s.skill);
+      if(USO_SKILLS.has(s.skill)) usoCounts[s.skill]=(usoCounts[s.skill]||0)+1;
+      else tecCounts[s.skill]=(tecCounts[s.skill]||0)+1;
+    });
+  });
+  const topUso = topN(usoCounts, 4);
+  const topTec = topN(tecCounts, 6);
+  const nivelCounts = {};
+  iaJobs.forEach(r => r.estudios.forEach(e => { if(e.nivel_estudio && e.nivel_estudio!=='No especificado') nivelCounts[e.nivel_estudio]=(nivelCounts[e.nivel_estudio]||0)+1; }));
+  const topNivelIa = topN(nivelCounts, 3);
+
+  document.getElementById('meta-route').textContent = `n = ${iaJobs.length} avisos clasificados como "Puesto de IA" dentro del filtro actual`;
+  document.getElementById('route-content').innerHTML = iaJobs.length ? `
+    ${iaJobs.length < N_MIN ? `<p class="low-n-note">⚠ n=${iaJobs.length} (&lt;30) — poco confiable, esta ruta se basa en muy pocos avisos con el filtro actual.</p>` : ''}
+    <ol class="route">
+      <li><b>Empieza por herramientas de uso</b> (aparecen en ${iaJobs.length ? pct(topUso[0]?.[1]||0, iaJobs.length):'0'}% de los "Puestos de IA" filtrados):
+        ${topUso.map(t=>`<span class="tag uso">${t[0]}</span>`).join(' ')}</li>
+      <li><b>Profundiza en las habilidades técnicas</b> que más se repiten en estos puestos:
+        ${topTec.map(t=>`<span class="tag tecnica">${t[0]}</span>`).join(' ')}</li>
+      <li><b>Formación que respalda estos puestos en la muestra:</b> ${topNivelIa.map(t=>t[0]).join(', ') || 'sin datos suficientes'}.</li>
+    </ol>
+    <div class="note-ext">
+      <b>Nota [conocimiento externo, no viene de la data]:</b> para practicar RAG y LangChain,
+      un punto de partida habitual es construir un proyecto pequeño end-to-end (ingesta de
+      documentos → embeddings → recuperación → respuesta con LLM) y documentarlo en un
+      repositorio público. Esto es una sugerencia pedagógica general, no una cifra medida en
+      este corpus.
+    </div>
+  ` : '<p class="meta">No hay avisos "Puesto de IA" con los filtros actuales.</p>';
+}
+
+function renderRecruitStats(recs){
+  const total = recs.length;
+  const conSalario = recs.filter(r => r.salary_min!==null || r.salary_max!==null).length;
+  const empresas = new Set(recs.map(r=>r.empresa)).size;
+  const conDias = recs.filter(r=>r.dias_activos!==null && r.dias_activos!==undefined);
+  const avgDias = conDias.length ? (conDias.reduce((a,r)=>a+r.dias_activos,0)/conDias.length).toFixed(1) : '—';
+  document.getElementById('stat-row-recruit').innerHTML = `
+    <div class="stat"><div class="num">${total}</div><div class="lbl">Avisos filtrados</div></div>
+    <div class="stat"><div class="num">${empresas}</div><div class="lbl">Empresas distintas</div></div>
+    <div class="stat"><div class="num">${pct(conSalario,total)}%</div><div class="lbl">Declara salario</div></div>
+    <div class="stat"><div class="num">${avgDias}</div><div class="lbl">Días activos (promedio)</div></div>
+  `;
+}
+
+function p95(values){
+  if(!values.length) return 0;
+  const sorted = [...values].sort((a,b)=>a-b);
+  const idx = Math.floor(0.95*(sorted.length-1));
+  return sorted[idx];
+}
+
+function renderDiasSector(recs){
+  const withDias = recs.filter(r => r.dias_activos!==null && r.dias_activos!==undefined);
+  const cap = p95(withDias.map(r=>r.dias_activos));
+  const bySector = {};
+  withDias.forEach(r => {
+    const v = Math.min(r.dias_activos, cap || r.dias_activos);
+    if(!bySector[r.sector]) bySector[r.sector] = { sum:0, n:0 };
+    bySector[r.sector].sum += v; bySector[r.sector].n += 1;
+  });
+  const entries = Object.entries(bySector).filter(([,v])=>v.n>=3)
+    .map(([k,v])=>[k, v.sum/v.n, v.n]).sort((a,b)=>b[1]-a[1]).slice(0,10);
+  const dayCounts = entries.map(e=>e[2]);
+  document.getElementById('meta-dias-sector').textContent = `n = ${recs.length} avisos filtrados · ${withDias.length} con dato de días activos · sectores con al menos 3 avisos (cap p95 = ${cap} días)`;
+  upsertChart('chart-dias-sector', {
+    type:'bar',
+    data:{ labels: entries.map(e=>`${e[0]} (n=${e[2]})`), datasets:[{ data: entries.map(e=>e[1].toFixed(1)), backgroundColor: lowNBarColors(dayCounts, cssVar('--chart-3')) }] },
+    options: { ...baseBarOptions(true), plugins:{ legend:{display:false}, tooltip:{ callbacks:{ afterLabel: lowNAfterLabel(dayCounts) } } } }
+  });
+  const [topDias] = entries;
+  document.getElementById('reading-dias-sector').innerHTML = topDias
+    ? `<b>${topDias[0]}</b> es el sector con más días activos en promedio (${topDias[1].toFixed(1)} días, n=${topDias[2]})${topDias[2]<N_MIN ? ' <span class="low-n-badge">poco confiable</span>' : ''}.`
+    : 'No hay suficientes avisos con días activos y con al menos 3 por sector, en este filtro.';
+}
+
+function renderRepub(recs){
+  const groups = {};
+  recs.forEach(r => {
+    if(!r.puesto || !r.empresa) return;
+    const key = r.puesto+' — '+r.empresa;
+    groups[key]=(groups[key]||0)+1;
+  });
+  const top = Object.entries(groups).filter(([,c])=>c>1).sort((a,b)=>b[1]-a[1]).slice(0,12);
+  document.getElementById('meta-repub').textContent = `n = ${recs.length} avisos filtrados, agrupados por (puesto estandarizado, empresa)`;
+  document.getElementById('repub-table').innerHTML = top.length ? `
+    <table><thead><tr><th>Puesto — Empresa</th><th>Repeticiones</th></tr></thead>
+    <tbody>${top.map(([k,c])=>`<tr><td>${k}</td><td>${c}</td></tr>`).join('')}</tbody></table>
+  ` : '<p class="meta">No hay puestos repetidos con estos filtros.</p>';
+}
+
+function renderSectorConcentracion(recs){
+  const bySector = countBy(recs, r=>r.sector);
+  const top = topN(bySector, 8);
+  const topKeys = new Set(top.map(t=>t[0]));
+  const restante = Object.entries(bySector).reduce((sum,[k,v]) => topKeys.has(k) ? sum : sum+v, 0);
+  const labels = top.map(t=>t[0]);
+  const values = top.map(t=>t[1]);
+  if(restante > 0){
+    const idxOtros = labels.indexOf('Otros');
+    if(idxOtros >= 0) values[idxOtros] += restante;
+    else { labels.push('Otros'); values.push(restante); }
+  }
+  document.getElementById('meta-sector-concentracion').textContent = `n = ${recs.length} avisos`;
+  upsertChart('chart-sector-concentracion', {
+    type:'doughnut',
+    data:{ labels: labels.map((l,i)=>`${l} (n=${values[i]})`),
+      datasets:[{ data: values, backgroundColor: PALETTE, borderColor: lowNBorderColors(values, PALETTE), borderWidth: 2 }] },
+    options: { ...basePieOptions(), plugins:{ ...basePieOptions().plugins, tooltip:{ callbacks:{ afterLabel: lowNAfterLabel(values) } } } }
+  });
+  const [first] = top;
+  document.getElementById('reading-sector-concentracion').innerHTML = first
+    ? `<b>${first[0]}</b> concentra ${pct(first[1],recs.length)}% de los avisos filtrados (n=${first[1]} de ${recs.length}).`
+    : 'No hay avisos con los filtros actuales.';
+}
+
+function renderEmpresas(recs){
+  const byEmpresa = countBy(recs, r=>r.empresa);
+  const top = topN(byEmpresa, 10);
+  const counts = top.map(t=>t[1]);
+  const nEmpresas = new Set(recs.map(r=>r.empresa)).size;
+  document.getElementById('meta-empresas').textContent = `n = ${recs.length} avisos publicados por ${nEmpresas} empresas distintas`;
+  upsertChart('chart-empresas', {
+    type:'bar',
+    data:{ labels: top.map(t=>t[0]), datasets:[{ data: counts, backgroundColor: lowNBarColors(counts, cssVar('--chart-1')) }] },
+    options: { ...baseBarOptions(true), plugins:{ legend:{display:false}, tooltip:{ callbacks:{ afterLabel: lowNAfterLabel(counts) } } } }
+  });
+  const [firstEmpresa] = top;
+  document.getElementById('reading-empresas').innerHTML = firstEmpresa
+    ? `<b>${firstEmpresa[0]}</b> es la empresa con más avisos en el filtro actual (${firstEmpresa[1]} de ${recs.length}, ${pct(firstEmpresa[1],recs.length)}%)${firstEmpresa[1]<N_MIN ? ' <span class="low-n-badge">poco confiable</span>' : ''}.`
+    : 'No hay avisos con los filtros actuales.';
+}
+
+function renderModalidad(recs){
+  const byMod = countBy(recs, r=>r.modalidad);
+  const labels = Object.keys(byMod);
+  const values = labels.map(l=>byMod[l]);
+  document.getElementById('meta-modalidad').textContent = `n = ${recs.length} avisos`;
+  upsertChart('chart-modalidad', {
+    type:'doughnut',
+    data:{ labels: labels.map((l,i)=>`${l} (n=${values[i]})`),
+      datasets:[{ data: values, backgroundColor: PALETTE, borderColor: lowNBorderColors(values, PALETTE), borderWidth: 2 }] },
+    options: { ...basePieOptions(), plugins:{ ...basePieOptions().plugins, tooltip:{ callbacks:{ afterLabel: lowNAfterLabel(values) } } } }
+  });
+  const noEsp = byMod['No especificado'] || 0;
+  document.getElementById('reading-modalidad').innerHTML =
+    `${pct(noEsp,recs.length)}% de los avisos filtrados (n=${noEsp} de ${recs.length}) no especifica modalidad en el texto original — no se imputó ningún valor.`;
+}
+
+function renderRegion(recs){
+  const byRegion = countBy(recs, r=>r.region);
+  const labels = Object.keys(byRegion);
+  const values = labels.map(l=>byRegion[l]);
+  document.getElementById('meta-region').textContent = `n = ${recs.length} avisos`;
+  upsertChart('chart-region', {
+    type:'doughnut',
+    data:{ labels: labels.map((l,i)=>`${l} (n=${values[i]})`),
+      datasets:[{ data: values, backgroundColor: PALETTE, borderColor: lowNBorderColors(values, PALETTE), borderWidth: 2 }] },
+    options: { ...basePieOptions(), plugins:{ ...basePieOptions().plugins, tooltip:{ callbacks:{ afterLabel: lowNAfterLabel(values) } } } }
+  });
+  const [topRegion] = topN(byRegion, 1);
+  document.getElementById('reading-region').innerHTML = topRegion
+    ? `<b>${topRegion[0]}</b> concentra ${pct(topRegion[1],recs.length)}% de los avisos filtrados (n=${topRegion[1]}); esto
+       refleja dónde publican las empresas que usan LinkedIn/Laborum, no necesariamente dónde está
+       toda la demanda real de talento en el país.`
+    : 'No hay avisos con los filtros actuales.';
+}
+
+function renderSalario(recs){
+  const conSalario = recs.filter(r => r.salary_min!==null || r.salary_max!==null);
+  markCardLowN('chart-salario', conSalario.length);
+  document.getElementById('meta-salario').textContent = `n = ${conSalario.length} de ${recs.length} avisos declaran salario (${pct(conSalario.length,recs.length)}%)`;
+  const sorted = [...conSalario].sort((a,b)=>(a.salary_min||a.salary_max)-(b.salary_min||b.salary_max));
+  upsertChart('chart-salario', {
+    type:'bar',
+    data:{
+      labels: sorted.map(r => `${r.puesto?.slice(0,22) || ''} (${r.empresa?.slice(0,16) || ''})`),
+      datasets:[
+        { label:'Mínimo', data: sorted.map(r=>r.salary_min ?? r.salary_max), backgroundColor: cssVar('--chart-2') },
+        { label:'Máximo', data: sorted.map(r=>(r.salary_max ?? r.salary_min) - (r.salary_min ?? r.salary_max)), backgroundColor: cssVar('--chart-1') }
+      ]
+    },
+    options:{
+      indexAxis:'y', responsive:true, maintainAspectRatio:false,
+      scales:{ x:{ stacked:true, grid:{color:cssVar('--border')}, ticks:{color:cssVar('--text-2')} }, y:{ stacked:true, grid:{display:false}, ticks:{color:cssVar('--text-2'), font:{size:9} } } },
+      plugins:{ legend:{ position:'top', labels:{color:cssVar('--text-2')} } }
+    }
+  });
+  document.getElementById('reading-salario').innerHTML = conSalario.length
+    ? `Con solo ${conSalario.length} avisos declarando salario, cualquier promedio por sector o
+       seniority no sería representativo — se muestra el detalle individual en vez de un
+       agregado engañoso.`
+    : 'Ningún aviso filtrado declara salario.';
+}
+
+function renderReqAbiertos(recs){
+  const withDias = recs.filter(r => r.dias_activos!==null && r.dias_activos!==undefined);
+  if(withDias.length < 8){
+    document.getElementById('req-abiertos-table').innerHTML = '<p class="meta">Muestra insuficiente con estos filtros.</p>';
+    document.getElementById('meta-req-abiertos').textContent = `solo ${withDias.length} avisos con dato de días activos — se necesitan al menos 8`;
+    return;
+  }
+  const sorted = [...withDias].sort((a,b)=>b.dias_activos-a.dias_activos);
+  const cut = Math.max(1, Math.floor(sorted.length*0.25));
+  const longOpen = sorted.slice(0,cut);
+  const rest = sorted.slice(cut);
+  function freq(group){
+    const m = {};
+    group.forEach(r => { const seen=new Set(); r.skills.forEach(s=>{ if(!seen.has(s.skill)){seen.add(s.skill); m[s.skill]=(m[s.skill]||0)+1;} }); });
+    return m;
+  }
+  const fLong = freq(longOpen), fRest = freq(rest);
+  const skillsAll = new Set([...Object.keys(fLong)]);
+  const rows = [...skillsAll].map(s => {
+    const pLong = (fLong[s]||0)/longOpen.length;
+    const pRest = (fRest[s]||0)/(rest.length||1);
+    return [s, pLong, pRest, pLong-pRest];
+  }).filter(r => (fLong[r[0]]||0) >= 3).sort((a,b)=>b[3]-a[3]).slice(0,10);
+  document.getElementById('meta-req-abiertos').textContent = `n = ${longOpen.length} avisos "abiertos+tiempo" (top 25%) vs. n = ${rest.length} en el resto, sobre ${withDias.length} avisos con dato`;
+  document.getElementById('req-abiertos-table').innerHTML = rows.length ? `
+    ${longOpen.length < N_MIN ? `<p class="low-n-note">⚠ n=${longOpen.length} (&lt;30) en el grupo "abierto más tiempo" — poco confiable.</p>` : ''}
+    <table><thead><tr><th>Habilidad</th><th>% en avisos abiertos+tiempo</th><th>% en el resto</th></tr></thead>
+    <tbody>${rows.map(r=>`<tr><td>${r[0]}</td><td>${(r[1]*100).toFixed(0)}%</td><td>${(r[2]*100).toFixed(0)}%</td></tr>`).join('')}</tbody></table>
+  ` : '<p class="meta">Sin habilidades con suficiente frecuencia para comparar.</p>';
+}
+
+render();
+</script>
+</body>
+</html>

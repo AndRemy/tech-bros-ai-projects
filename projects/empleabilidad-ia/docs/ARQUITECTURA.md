@@ -62,40 +62,46 @@ reprocesar una oferta que ya existía.
 
 ## Los scripts
 
-### Scraping
+### Scraping (`ingesta/`)
 
 | Script | Qué hace |
 |---|---|
-| `scraper_laborum_dirigido.py` | Busca por 22 keywords de IA/datos en Laborum. **Gratis.** Parsea el estado de Apollo serializado en el HTML |
-| `scraper_linkedin.py` | Busca por 15 keywords (7 español + 8 inglés) vía Apify. **Consume crédito** |
+| `ingesta/scraper_laborum_dirigido.py` | Busca por 22 keywords de IA/datos en Laborum. **Gratis.** Parsea el estado de Apollo serializado en el HTML |
+| `ingesta/scraper_linkedin.py` | Busca por 15 keywords (7 español + 8 inglés) vía Apify. **Consume crédito** |
 
 Ambos son idempotentes: filtran contra lo que ya está en la base y el índice único
 descarta lo demás. Re-ejecutarlos hoy no agrega nada ni duplica.
 
-### Ingesta
+### Ingesta (`ingesta/`)
 
 | Script | Qué hace |
 |---|---|
-| `setup_db.py` | Crea las 7 tablas y el índice único. Idempotente |
-| `uploader.py` | Carga los JSON de `data_raw/` a la base. Solo se necesita si scrapeaste a archivo |
-| `dedup_db.py` | Migración puntual: repobla `source_id` y elimina duplicados por identificador nativo |
+| `ingesta/setup_db.py` | Crea las 7 tablas y el índice único. Idempotente |
+| `ingesta/uploader.py` | Carga los JSON de `data_raw/` a la base. Solo se necesita si scrapeaste a archivo |
+| `ingesta/dedup_db.py` | Migración puntual: repobla `source_id` y elimina duplicados por identificador nativo |
 
-### Extracción
-
-| Script | Qué hace |
-|---|---|
-| `processor.py` | El corazón. Lee ofertas sin procesar, llama a Claude con salida estructurada y puebla los dos modelos |
-| `manual_batch.py` | Vía alternativa **sin API**: la extracción la hace un asistente en sesión, reutilizando el esquema y `guardar()` de `processor.py` |
-
-### Limpieza
+### Extracción (`analisis/`)
 
 | Script | Qué hace |
 |---|---|
-| `clean_db.py` | Descarta ofertas sin señal técnica de IA/datos. Solo aplica a portales generalistas |
-| `dedup_contenido.py` | Elimina avisos repetidos por título+empresa (LinkedIn les da `source_id` distinto) |
-| `consolidar_skills.py` | Fusiona variantes ("Inglés"/"English") y corrige dominios contradictorios |
-| `nivel_desde_titulo.py` | Deriva `nivel_puesto` del título con regex. Solo pisa al LLM cuando el título da señal |
-| `clasificar_ofertas.py` | Destilda tecnología genérica mal marcada como IA y clasifica la oferta en 3 tipos |
+| `analisis/processor.py` | El corazón. Lee ofertas sin procesar, llama a Claude con salida estructurada y puebla los dos modelos |
+| `analisis/manual_batch.py` | Vía alternativa **sin API**: la extracción la hace un asistente en sesión, reutilizando el esquema y `guardar()` de `processor.py` |
+
+### Limpieza (`ingesta/` + `analisis/`)
+
+| Script | Qué hace |
+|---|---|
+| `ingesta/clean_db.py` | Descarta ofertas sin señal técnica de IA/datos. Solo aplica a portales generalistas |
+| `analisis/dedup_contenido.py` | Elimina avisos repetidos por título+empresa (LinkedIn les da `source_id` distinto) |
+| `analisis/consolidar_skills.py` | Fusiona variantes ("Inglés"/"English") y corrige dominios contradictorios |
+| `analisis/nivel_desde_titulo.py` | Deriva `nivel_puesto` del título con regex. Solo pisa al LLM cuando el título da señal |
+| `analisis/clasificar_ofertas.py` | Destilda tecnología genérica mal marcada como IA y clasifica la oferta en 3 tipos |
+
+### Reporte (`reporte/`)
+
+| Script | Qué hace |
+|---|---|
+| `reporte/generar_reporte.py` | Consulta la BD, exporta `datos/data.json` e inyecta ese JSON en `reporte/plantilla.html` para producir `reporte/index.html` |
 
 ## Cómo `processor.py` extrae
 
