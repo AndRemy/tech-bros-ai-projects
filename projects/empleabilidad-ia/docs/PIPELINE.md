@@ -72,7 +72,7 @@ python analisis/nivel_desde_titulo.py --apply
 python analisis/clasificar_ofertas.py --apply
 
 # Reporte (reporte/)
-python reporte/generar_reporte.py
+python reporte/generar_roles.py
 ```
 
 ## Convención de banderas

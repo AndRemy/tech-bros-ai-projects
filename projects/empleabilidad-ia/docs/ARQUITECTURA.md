@@ -101,7 +101,7 @@ descarta lo demás. Re-ejecutarlos hoy no agrega nada ni duplica.
 
 | Script | Qué hace |
 |---|---|
-| `reporte/generar_reporte.py` | Consulta la BD, exporta `datos/data.json` e inyecta ese JSON en `reporte/plantilla.html` para producir `reporte/index.html` |
+| `reporte/generar_roles.py` | Consulta la BD, exporta `datos/roles.json` e inyecta ese JSON en `reporte/plantillas/roles.html` para producir `reporte/roles.html` |
 
 ## Cómo `processor.py` extrae
 

@@ -1,10 +1,12 @@
-"""Genera `roles.html`: el reporte interactivo de categorías funcionales de roles de IA.
+"""Genera `roles.html`, el reporte interactivo del proyecto.
 
-Complementa a `generar_reporte.py` (que produce `index.html`, la vista general del
-mercado). Este toma como eje **el rol**: qué significa trabajar en IA, qué habilidades
-pide cada tipo de trabajo y qué hace cada sector con la IA.
+Toma como eje **el rol**: qué significa trabajar en IA, qué habilidades pide cada tipo
+de trabajo, qué hace cada sector con ella y en qué estado está la adopción. Se apoya en
+`analisis/categorias_funcionales.py` para la clasificación multi-etiqueta.
 
-Se apoya en `analisis/categorias_funcionales.py` para la clasificación multi-etiqueta.
+Lee `plantillas/roles.html` (que trae el marcador `__DATA_JSON__`), le inyecta los datos
+de la base y escribe `roles.html` al lado. El HTML de salida es autocontenido y **no se
+edita a mano**: cualquier cambio se pierde en la siguiente corrida — edita la plantilla.
 
     python reporte/generar_roles.py
 """
@@ -24,13 +26,13 @@ AQUI = Path(__file__).parent
 RAIZ = AQUI.parent
 sys.path.insert(0, str(RAIZ / "analisis"))
 from categorias_funcionales import (  # noqa: E402
-    CATEGORIAS, cargar_y_clasificar,
+    CATEGORIAS, IA_ESTRICTA, cargar_y_clasificar,
 )
 
 load_dotenv()
 DATABASE_URL = os.environ.get("DATABASE_URL")
 DATOS_DIR = RAIZ / "datos"
-PLANTILLA = AQUI / "plantilla_roles.html"
+PLANTILLA = AQUI / "plantillas" / "roles.html"
 SALIDA = AQUI / "roles.html"
 
 # --- descripciones de cada categoría -------------------------------------
@@ -165,10 +167,19 @@ def main() -> None:
         clasificado = cargar_y_clasificar(cur)
 
         cur.execute("""SELECT raw_id, nivel_puesto, rubro_inferido, ciudad,
-                              nombre_puesto_estandarizado, nombre_empresa
+                              nombre_puesto_estandarizado, nombre_empresa, tipo_oferta
                        FROM puestos""")
         puestos = {str(r[0]): {"nivel": r[1], "rubro": r[2], "ciudad": r[3],
-                               "puesto": r[4], "empresa": r[5]} for r in cur.fetchall()}
+                               "puesto": r[4], "empresa": r[5], "tipo": r[6]}
+                   for r in cur.fetchall()}
+
+        # Dominios de IA por aviso: alimentan la lectura de adopción (GenAI vs ML).
+        dominios = defaultdict(set)
+        cur.execute("""SELECT js.job_id, sd.ai_domain FROM job_skills js
+                       JOIN skill_dictionary sd USING (skill_id)
+                       WHERE sd.ai_domain <> 'No aplica'""")
+        for job_id, dom in cur.fetchall():
+            dominios[job_id].add(dom)
 
         habilidades = defaultdict(list)
         cur.execute("""SELECT js.job_id, sd.canonical_skill FROM job_skills js
@@ -200,6 +211,7 @@ def main() -> None:
             "seniority": p["nivel"] or "No especificado",
             "skills": sorted(set(habilidades.get(job_id, []))),
             "carreras": sorted(set(carreras.get(job_id, []))),
+            "dominios": sorted(dominios.get(job_id, set()) & IA_ESTRICTA),
         })
 
     # títulos de puesto típicos por categoría, para hacer tangible cada definición
@@ -208,8 +220,20 @@ def main() -> None:
         cuenta = Counter(r["puesto"] for r in registros if c in r["cats"] and r["puesto"])
         titulos_por_cat[c] = [t for t, _ in cuenta.most_common(6)]
 
+    # Contexto del corpus COMPLETO (no sólo los avisos con IA). La sección de
+    # adopción los necesita y no son filtrables: describen la muestra entera.
+    empresas_corpus = {p["empresa"] for p in puestos.values() if p["empresa"]}
+    empresas_con_ia = {r["empresa"] for r in registros if r["empresa"]}
+    tipo_oferta = Counter(p["tipo"] for p in puestos.values() if p["tipo"])
+
     payload = {
         "registros": registros,
+        "corpus": {
+            "avisos": len(puestos),
+            "empresas": len(empresas_corpus),
+            "empresas_con_ia": len(empresas_con_ia),
+            "tipo_oferta": dict(tipo_oferta),
+        },
         "categorias": CATEGORIAS,
         "definiciones": DEFINICIONES,
         "titulos_por_categoria": titulos_por_cat,
