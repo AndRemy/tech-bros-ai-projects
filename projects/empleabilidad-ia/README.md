@@ -67,9 +67,10 @@ empleabilidad-ia/
 │                  consolidar_skills.py · nivel_desde_titulo.py · clasificar_ofertas.py
 │                  categorias_funcionales.py
 ├── reporte/     generación y salida del HTML
-│                  generar_reporte.py · plantilla.html · index.html
-│                  generar_roles.py · plantilla_roles.html · roles.html
-├── datos/       exports intermedios (gitignored: data.json, roles.json)
+│   ├── generar_roles.py      consulta la BD e inyecta los datos
+│   ├── plantillas/roles.html la fuente que se edita
+│   └── roles.html            la salida, generada (no editar a mano)
+├── datos/       exports intermedios (gitignored: roles.json)
 ├── docs/        arquitectura, pipeline, hallazgos, decisiones
 ├── .env         credenciales, nunca versionado
 └── README.md
@@ -90,9 +91,9 @@ empleabilidad-ia/
                                              544 ofertas             skill_dictionary
                                              8.344 habilidades       puestos · estudios
                                                                           ↓
-                                                                  reporte/generar_reporte.py
+                                                                  reporte/generar_roles.py
                                                                           ↓
-                                                                  reporte/index.html
+                                                                  reporte/roles.html
 ```
 
 Cada habilidad extraída guarda **la frase textual de la oferta que la sustenta** y
@@ -163,24 +164,18 @@ python analisis/clasificar_ofertas.py --apply
 **Todos los scripts destructivos previsualizan por defecto** y requieren `--apply`
 para escribir. Los scrapers usan `--dry-run` para el comportamiento inverso.
 
-### 3. Reportes — generación del HTML (`reporte/`)
+### 3. Reporte — generación del HTML (`reporte/`)
 
 ```bash
-python reporte/generar_reporte.py    # → reporte/index.html  (el mercado)
-python reporte/generar_roles.py      # → reporte/roles.html  (los roles)
+python reporte/generar_roles.py
 ```
 
-Cada script consulta la BD, escribe su export intermedio en `datos/` (gitignored) e
-inyecta ese JSON en su plantilla:
+Consulta la BD, escribe el export intermedio en `datos/roles.json` (gitignored) e inyecta
+ese JSON en `reporte/plantillas/roles.html`, produciendo `reporte/roles.html`.
 
-| Script | Export | Plantilla | Salida |
-|---|---|---|---|
-| `generar_reporte.py` | `datos/data.json` | `plantilla.html` | `index.html` |
-| `generar_roles.py` | `datos/roles.json` | `plantilla_roles.html` | `roles.html` |
-
-Son idempotentes: correrlos de nuevo sobrescribe el HTML con la data actual. **No edites
-los HTML de salida a mano** — el cambio se pierde en la siguiente corrida; edita la
-plantilla.
+Es idempotente: correrlo de nuevo sobrescribe la salida con la data actual. **No edites
+`reporte/roles.html` a mano** — el cambio se pierde en la siguiente corrida; edita la
+plantilla en `reporte/plantillas/`.
 
 `generar_roles.py` se apoya en [`analisis/categorias_funcionales.py`](analisis/categorias_funcionales.py),
 que clasifica cada aviso por lo que hace con la IA. Ese módulo también corre solo, para
@@ -190,23 +185,45 @@ inspeccionar la clasificación sin generar el reporte:
 python analisis/categorias_funcionales.py
 ```
 
-## Reportes
+## Reporte
 
-Dos reportes interactivos autocontenidos, sin build step y con Chart.js incrustado.
-Se abren directamente en el navegador, no necesitan servidor.
+**[`reporte/roles.html`](reporte/roles.html)** — interactivo, autocontenido, sin build step
+y con Chart.js incrustado. Se abre directamente en el navegador, no necesita servidor.
 
-**[`reporte/index.html`](reporte/index.html) — el mercado.** Filtros por sector, región,
-seniority y periodo; vistas separadas "Para postulantes" y "Para reclutadores"; cada
-gráfico declara qué mide, sobre cuántos avisos (n=X) y una lectura en una frase.
+Toma como eje qué significa *trabajar* en IA: siete categorías funcionales derivadas del
+texto de los avisos (construir, operar en producción, automatizar, analizar, liderar,
+programar con IA, usar herramientas). Once secciones, de lo general a lo específico:
 
-**[`reporte/roles.html`](reporte/roles.html) — los roles.** Toma como eje qué significa
-*trabajar* en IA: siete categorías funcionales derivadas del texto de los avisos
-(construir, operar en producción, automatizar, analizar, liderar, programar con IA,
-usar herramientas), con las habilidades de cada una, la firma funcional de cada sector
-y una ruta de entrada por seniority. Base: los 317 avisos que exigen IA estricta.
+| | Sección | Responde |
+|---|---|---|
+| 01–04 | Siete tipos de funciones · Las funciones más pedidas · Las combinaciones · Los sectores | Qué es trabajar en IA y quién lo hace |
+| 05–08 | Las habilidades · Habilidades en común · Las carreras · Los escalones | Qué necesitas saber y cómo avanzas |
+| 09 | La adopción | En qué estado está la adopción de IA en el Perú |
+| 10 | La ruta de entrada | Por dónde empezar, por escalón de seniority |
+| 11 | La ficha técnica | Metodología y límites |
 
-> Ambos reportes son foto de agosto de 2026. Para regenerarlos con la data actual de la
-> base, corre los scripts de la etapa 3 (más abajo) — no edites el HTML a mano.
+Barra lateral fija con las secciones, la activa marcada según el scroll y la advertencia
+metodológica al pie; bajo 1080px se oculta y la advertencia pasa a un banner superior.
+
+**No tiene filtros, y es deliberado.** Se probaron tres y todos degradaban la narrativa:
+filtrar por sector o por seniority vaciaba justo las secciones 04, 08 y 10 —que comparan
+*entre* sectores y *entre* niveles— dejando la prosa afirmando cosas que la tabla ya no
+mostraba; y filtrar por región resultaba engañoso, porque 23.3% de los avisos no declara
+ciudad y el corte "Lima" era en realidad "los que sí dijeron Lima". Los cortes internos
+con n<30 sí se marcan como poco confiables. Base: los **317 avisos que exigen IA
+estricta**, de un corpus de 544.
+
+> Es una foto de agosto de 2026. Para regenerarlo con la data actual de la base, corre el
+> script de la etapa 3 (más abajo) — **no edites el HTML de salida a mano**, se pierde en la
+> siguiente corrida.
+
+<details>
+<summary>Hubo un segundo reporte, orientado al mercado (<code>index.html</code>)</summary>
+
+Cubría el mismo corpus con vistas separadas para postulantes y reclutadores. Se retiró
+porque `roles.html` responde las mismas preguntas con un eje más claro. Sigue en el
+historial de git si hiciera falta recuperarlo.
+</details>
 
 ## Documentación
 
@@ -221,8 +238,8 @@ y una ruta de entrada por seniority. Base: los 317 avisos que exigen IA estricta
 
 **Qué está listo:** 544 ofertas peruanas extraídas y limpias, con integridad
 verificada (0 huérfanas, 0 duplicados, 0 nombres repetidos en el diccionario).
-Pipeline completo y re-ejecutable. Dos reportes interactivos:
-[`reporte/index.html`](reporte/index.html) y [`reporte/roles.html`](reporte/roles.html).
+Pipeline completo y re-ejecutable. Reporte interactivo en
+[`reporte/roles.html`](reporte/roles.html).
 
 **Qué falta:** el post de LinkedIn.
 

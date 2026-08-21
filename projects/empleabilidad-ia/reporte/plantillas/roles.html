@@ -47,6 +47,7 @@
     --heat-0:#f0eae0; --heat-txt:#1f1a17; --on-cc:#fbf8f3;
     --shadow: 0 1px 2px rgba(31,26,23,0.05), 0 2px 10px rgba(31,26,23,0.04);
     --radius: 9px;
+    --barra-w: 256px;
     --font-display: "Fraunces", Georgia, "Times New Roman", serif;
     --font-body: "Source Sans 3", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   }
@@ -76,7 +77,7 @@
   }
   *{box-sizing:border-box;}
   body{margin:0; background:var(--bg); color:var(--text); line-height:1.6;
-    font-family:var(--font-body); font-size:16px;
+    font-family:var(--font-body); font-size:16px; padding-left:var(--barra-w);
     -webkit-font-smoothing:antialiased;}
   .wrap{max-width:1150px; margin:0 auto; padding:0 20px 70px;}
   header.top{padding:40px 20px 10px; max-width:1150px; margin:0 auto;}
@@ -86,13 +87,54 @@
   :focus-visible{outline:2px solid var(--accent); outline-offset:2px; border-radius:3px;}
   @media (prefers-reduced-motion: reduce){ *{transition:none !important; animation:none !important;} }
 
-  .banner{background:var(--warn-bg); border:1px solid var(--warn-border); color:var(--warn-text);
-    border-radius:var(--radius); padding:13px 17px; margin:18px 0 22px; font-size:0.85rem;}
+
+  /* --- barra lateral de navegación --- */
+  .barra{position:fixed; inset:0 auto 0 0; z-index:70; width:var(--barra-w);
+    display:flex; flex-direction:column; padding:24px 16px;
+    background:var(--surface); border-right:1px solid var(--border);}
+  .barra__marca{display:flex; gap:0.65rem; align-items:center;
+    padding:0 0.5rem 0.95rem; border-bottom:1px solid var(--border);}
+  .barra__sello{width:2.3rem; height:2.3rem; flex:0 0 auto; border-radius:7px;
+    background:var(--text); display:grid; place-items:center;}
+  .barra__sello svg{display:block;}
+  .barra__marca strong{display:block; font-family:var(--font-display); font-size:0.95rem;
+    font-weight:700; letter-spacing:-0.01em; line-height:1.25; color:var(--text);}
+  .barra__marca span{display:block; font-size:0.68rem; color:var(--text-3); margin-top:0.1rem;}
+  .barra__nav{display:flex; flex-direction:column; gap:0.1rem; flex:1; overflow-y:auto;
+    margin-top:14px;}
+  .barra__nav a{position:relative; display:flex; gap:0.6rem; align-items:center;
+    padding:0.5rem 0.65rem 0.5rem 0.8rem; border-radius:6px; text-decoration:none;
+    color:var(--text-2); font-size:0.84rem; line-height:1.3;
+    transition:background .12s, color .12s;}
+  .barra__nav a::before{content:""; position:absolute; left:0; top:50%; width:3px; height:0;
+    transform:translateY(-50%); border-radius:0 3px 3px 0; background:var(--accent);
+    transition:height .16s ease;}
+  .barra__nav a i{font-style:normal; font-size:0.68rem; font-weight:700; color:var(--text-3);
+    font-variant-numeric:tabular-nums; letter-spacing:0.02em;}
+  .barra__nav a:hover{background:var(--surface-2); color:var(--text);}
+  .barra__nav a:hover::before{height:40%; background:var(--border);}
+  .barra__nav a.on{background:linear-gradient(90deg,
+      color-mix(in srgb, var(--accent) 12%, transparent), transparent);
+    color:var(--text); font-weight:700;}
+  .barra__nav a.on::before{height:62%; background:var(--accent);}
+  .barra__nav a.on i{color:var(--accent);}
+  .barra__pie{margin-top:auto; padding:14px 8px 0; border-top:1px solid var(--border);}
+  .barra__pie h4{margin:0 0 6px; font-size:0.63rem; font-weight:800; letter-spacing:0.12em;
+    text-transform:uppercase; color:var(--accent-3);}
+  .barra__pie p{margin:0; font-size:0.72rem; line-height:1.45; color:var(--text-3);}
+  .barra__pie b{color:var(--text-2); font-weight:700;}
+  .barra__pie a{color:var(--text-2); text-decoration:underline; text-underline-offset:2px;}
+
+  /* La advertencia vive en el pie de la barra lateral; este banner es el respaldo para
+     cuando la barra se oculta, de modo que nunca se pierde ni se duplica. */
+  .banner{display:none; background:var(--warn-bg); border:1px solid var(--warn-border);
+    color:var(--warn-text); border-radius:var(--radius); padding:13px 17px; margin:18px 0 22px;
+    font-size:0.85rem;}
   .banner b{font-weight:700;}
 
   .filters{background:var(--surface); border:1px solid var(--border); border-radius:var(--radius);
     padding:14px 17px; margin-bottom:12px; display:flex; flex-wrap:wrap; gap:12px 20px;
-    align-items:flex-end; box-shadow:var(--shadow); position:sticky; top:0; z-index:60;}
+    align-items:flex-end; box-shadow:var(--shadow);}
   .ff{display:flex; flex-direction:column; gap:4px;}
   .ff label{font-size:0.7rem; text-transform:uppercase; letter-spacing:0.05em; color:var(--text-3); font-weight:700;}
   select{background:var(--surface-2); color:var(--text); border:1px solid var(--border);
@@ -106,7 +148,7 @@
     font-weight:700; text-transform:uppercase; background:var(--warn-bg);
     border:1px solid var(--warn-border); color:var(--warn-text);}
 
-  section{margin:52px 0 0; scroll-margin-top:90px;}
+  section{margin:52px 0 0; scroll-margin-top:24px;}
   .sec-head{border-top:2px solid var(--text); padding-top:16px; margin-bottom:6px;}
   .sec-num{font-size:0.7rem; font-weight:700; letter-spacing:0.14em; color:var(--accent);
     text-transform:uppercase; font-variant-numeric:tabular-nums;}
@@ -118,15 +160,15 @@
     letter-spacing:-0.01em;}
   .card{background:var(--surface); border:1px solid var(--border); border-radius:var(--radius);
     padding:18px 20px; box-shadow:var(--shadow);}
-  .grid2{display:grid; grid-template-columns:repeat(auto-fit,minmax(400px,1fr)); gap:16px;}
+  .grid2{display:grid; grid-template-columns:repeat(auto-fit,minmax(min(400px,100%),1fr)); gap:16px;}
   .meta{color:var(--text-3); font-size:0.78rem; margin:0 0 12px;}
   .reading{margin:12px 0 0; padding:9px 12px; background:var(--surface-2); border-radius:7px;
     font-size:0.85rem; color:var(--text-2); border-left:3px solid var(--accent-2);}
   .reading b{color:var(--text);}
-  canvas{max-height:330px;}
+  canvas{max-width:100%; max-height:330px;}
 
   /* --- tarjetas de categoría --- */
-  .cats-grid{display:grid; grid-template-columns:repeat(auto-fit,minmax(330px,1fr)); gap:14px;}
+  .cats-grid{display:grid; grid-template-columns:repeat(auto-fit,minmax(min(330px,100%),1fr)); gap:14px;}
   .cat-card{background:var(--surface); border:1px solid var(--border); border-left:5px solid var(--cc);
     border-radius:var(--radius); padding:16px 18px; box-shadow:var(--shadow); display:flex; flex-direction:column;}
   .cat-card h3{font-family:var(--font-display); font-weight:600; margin:0 0 3px; font-size:1.06rem;
@@ -181,7 +223,7 @@
   .step-hd h3{font-family:var(--font-display); font-weight:600; margin:0; font-size:1.14rem; letter-spacing:-0.01em;}
   .step-share{font-size:0.78rem; color:var(--text-3);}
   .step-share b{color:var(--cc); font-size:1.05rem; font-weight:700; font-variant-numeric:tabular-nums;}
-  .step-grid{display:grid; grid-template-columns:repeat(auto-fit,minmax(250px,1fr)); gap:14px; margin-top:11px;}
+  .step-grid{display:grid; grid-template-columns:repeat(auto-fit,minmax(min(250px,100%),1fr)); gap:14px; margin-top:11px;}
   .step-blk h4{margin:0 0 6px; font-size:0.72rem; text-transform:uppercase; letter-spacing:0.05em;
     color:var(--text-3); font-weight:800;}
   .step-blk .tag{font-size:0.76rem;}
@@ -199,8 +241,13 @@
     color:var(--text-3); font-size:0.78rem;}
   ol.meth li{margin-bottom:7px; font-size:0.86rem; color:var(--text-2);}
   ol.meth b{color:var(--text);}
+  @media (max-width:1080px){
+    .barra{display:none;}
+    body{padding-left:0;}
+    .banner{display:block;}
+  }
   @media (max-width:640px){
-    .filters{flex-direction:column; align-items:stretch; position:static;}
+    .filters{flex-direction:column; align-items:stretch;}
     .fcount{margin-left:0;}
     .skill-row{grid-template-columns:120px 1fr 54px;}
   }
@@ -215,6 +262,31 @@
   <b id="hdr-n">317</b> avisos de empleo peruanos que exigen IA.</p>
 </header>
 
+<aside class="barra" aria-label="Navegación del reporte">
+  <div class="barra__marca">
+    <span class="barra__sello" aria-hidden="true">
+      <svg viewBox="0 0 24 24" width="20" height="20" fill="none">
+        <rect x="3" y="13" width="4.2" height="8" rx="1.4" fill="var(--c2)"></rect>
+        <rect x="9.9" y="8" width="4.2" height="13" rx="1.4" fill="var(--c3)"></rect>
+        <rect x="16.8" y="4" width="4.2" height="17" rx="1.4" fill="var(--c1)"></rect>
+      </svg>
+    </span>
+    <span>
+      <strong>Trabajar en IA</strong>
+      <span>Mercado peruano · 2026</span>
+    </span>
+  </div>
+  <nav class="barra__nav" id="toc"></nav>
+  <div class="barra__pie">
+    <h4>Sobre este reporte</h4>
+    <p>Muestra no probabilística: 544 avisos de LinkedIn y Laborum de agosto de 2026, de los
+      cuales 317 exigen IA. <b>No es un censo del mercado laboral peruano</b> — sobre-representa
+      empresas formales de Lima. Las categorías de rol son una clasificación derivada del texto,
+      con ~75% de precisión. Sus límites están en la
+      <a href="#metodologia">ficha técnica</a>.</p>
+  </div>
+</aside>
+
 <div class="wrap">
 
   <div class="banner">
@@ -226,26 +298,10 @@
     Detalle en <a href="#metodologia" style="color:inherit;">Metodología</a>.
   </div>
 
-  <div class="filters">
-    <div class="ff">
-      <label for="f-region">Región</label>
-      <select id="f-region"><option value="">Todo el Perú</option></select>
-    </div>
-    <div class="ff">
-      <label for="f-sen">Seniority</label>
-      <select id="f-sen"><option value="">Todos los niveles</option></select>
-    </div>
-    <div class="ff">
-      <label for="f-ind">Industria</label>
-      <select id="f-ind"><option value="">Todas</option></select>
-    </div>
-    <button class="btn" id="f-reset">Limpiar</button>
-    <div class="fcount"><b id="nf">317</b> <span id="nf-txt">avisos con IA</span><span id="nf-low"></span></div>
-  </div>
 
   <!-- ============ 1 ============ -->
   <section id="s1">
-    <div class="sec-head"><div class="sec-num">01 · El marco</div>
+    <div class="sec-head"><div class="sec-num">01 · Siete tipos de funciones</div>
       <h2>¿Qué significa “trabajar en IA”?</h2></div>
     <p class="sec-lead">No es una sola cosa. Al leer qué verbos usan los avisos cuando hablan de IA
       —diseñar, desarrollar, implementar, automatizar, liderar— aparecen <b>siete formas distintas
@@ -255,7 +311,7 @@
 
   <!-- ============ 2 ============ -->
   <section id="s2">
-    <div class="sec-head"><div class="sec-num">02 · El mapa</div>
+    <div class="sec-head"><div class="sec-num">02 · Las funciones más pedidas</div>
       <h2>¿Cuánto pesa cada forma de trabajar en IA?</h2></div>
     <p class="sec-lead">El tamaño relativo de cada categoría dice dónde está realmente la demanda.</p>
     <div class="card">
@@ -267,7 +323,7 @@
 
   <!-- ============ 3 ============ -->
   <section id="s3">
-    <div class="sec-head"><div class="sec-num">03 · La estructura</div>
+    <div class="sec-head"><div class="sec-num">03 · Las combinaciones</div>
       <h2>Los roles no son islas: cómo se combinan</h2></div>
     <p class="sec-lead">Casi ningún aviso pide una sola función. Esta matriz lee así: <b>de los
       avisos de la fila, qué porcentaje también pide la columna</b>. No es simétrica — y ahí está
@@ -300,7 +356,7 @@
 
   <!-- ============ 5 ============ -->
   <section id="s5">
-    <div class="sec-head"><div class="sec-num">05 · Lo accionable</div>
+    <div class="sec-head"><div class="sec-num">05 · Las habilidades</div>
       <h2>¿Qué habilidades necesito para cada tipo de trabajo?</h2></div>
     <p class="sec-lead">Elige una función y mira qué se pide realmente para ella, ordenado de
       mayor a menor frecuencia. El porcentaje es sobre los avisos de <em>esa</em> categoría.</p>
@@ -314,7 +370,7 @@
 
   <!-- ============ 6 ============ -->
   <section id="s6">
-    <div class="sec-head"><div class="sec-num">06 · La estrategia</div>
+    <div class="sec-head"><div class="sec-num">06 · Habilidades en común</div>
       <h2>El núcleo común y la especialización</h2></div>
     <p class="sec-lead">Si tuvieras que elegir qué aprender primero: unas habilidades abren
       <em>todas</em> las puertas y otras abren una sola. Aquí están separadas por en cuántas de
@@ -336,7 +392,7 @@
 
   <!-- ============ 7 ============ -->
   <section id="s7">
-    <div class="sec-head"><div class="sec-num">07 · La formación</div>
+    <div class="sec-head"><div class="sec-num">07 · Las carreras</div>
       <h2>¿Qué carreras piden para cada función?</h2></div>
     <p class="sec-lead">Un mismo aviso suele aceptar varias carreras, así que las menciones no
       suman 100%. Lo interesante no es quién lidera, sino qué carrera es
@@ -350,7 +406,7 @@
 
   <!-- ============ 8 ============ -->
   <section id="s8">
-    <div class="sec-head"><div class="sec-num">08 · La trayectoria</div>
+    <div class="sec-head"><div class="sec-num">08 · Los escalones</div>
       <h2>¿Cómo cambia el trabajo a medida que avanzas?</h2></div>
     <p class="sec-lead">La misma lectura anterior, pero por nivel de seniority. Muestra qué se
       espera de ti en cada escalón — y qué aparece sólo cuando subes.</p>
@@ -361,9 +417,56 @@
     </div>
   </section>
 
-  <!-- ============ 9 ============ -->
+  <!-- ============ 9 · adopción ============ -->
   <section id="s9">
-    <div class="sec-head"><div class="sec-num">09 · El cierre</div>
+    <div class="sec-head"><div class="sec-num">09 · La adopción</div>
+      <h2>¿En qué estado está la adopción de IA en el Perú?</h2></div>
+    <p class="sec-lead">Todo lo anterior describe <em>cómo</em> se ve el mercado. Esta sección
+      intenta explicar <em>por qué</em> se ve así — y la respuesta cambia cómo se leen las
+      secciones anteriores.</p>
+
+    <div class="grid2">
+      <div class="card">
+        <h3 class="cardTitle">Ancha, pero delgada</h3>
+        <p class="meta" id="m-ad1"></p>
+        <div id="ad-concentracion"></div>
+        <p class="reading" id="r-ad1"></p>
+      </div>
+      <div class="card">
+        <h3 class="cardTitle">La generativa alcanzó al machine learning</h3>
+        <p class="meta" id="m-ad2"></p>
+        <div id="ad-dominios"></div>
+        <p class="reading" id="r-ad2"></p>
+      </div>
+    </div>
+
+    <div class="grid2" style="margin-top:16px;">
+      <div class="card">
+        <h3 class="cardTitle">Se gobierna, pero sin gerentes puros</h3>
+        <p class="meta" id="m-ad3"></p>
+        <div id="ad-gobierno"></div>
+        <p class="reading" id="r-ad3"></p>
+      </div>
+      <div class="card">
+        <h3 class="cardTitle">La difusión entra por el borde</h3>
+        <p class="meta">Sobre el corpus completo (544 avisos)</p>
+        <div id="ad-difusion"></div>
+        <p class="reading" id="r-ad4"></p>
+      </div>
+    </div>
+
+    <div class="note" style="margin-top:16px;">
+      <b>Lo que esta lectura NO permite afirmar.</b> Que una empresa publique un solo aviso
+      significa que publicó uno <em>en esta captura de un día</em> — no que tenga una sola persona
+      de IA: pudo publicar otros antes o después. Es una señal, no un censo. Tampoco hay serie
+      temporal, así que no se puede decir que la adopción "está creciendo": esto es una foto.
+      Y describe empresas formales que publican en LinkedIn y Laborum, mayormente de Lima.
+    </div>
+  </section>
+
+  <!-- ============ 10 · cierre ============ -->
+  <section id="s10">
+    <div class="sec-head"><div class="sec-num">10 · La ruta de entrada</div>
       <h2>Si quieres entrar y no sabes por dónde empezar</h2></div>
     <p class="sec-lead">Todo lo anterior, leído como una ruta. Cada escalón muestra qué te van a
       pedir, qué habilidades aparecen con más frecuencia y —lo más útil— <b>qué cambia respecto al
@@ -377,7 +480,7 @@
 
   <!-- ============ metodología ============ -->
   <section id="metodologia">
-    <div class="sec-head"><div class="sec-num">10 · La letra chica</div>
+    <div class="sec-head"><div class="sec-num">11 · La ficha técnica</div>
       <h2>Metodología y límites</h2></div>
     <div class="card">
       <ol class="meth">
@@ -440,38 +543,16 @@ Chart.defaults.font.family = "Source Sans 3, -apple-system, BlinkMacSystemFont, 
 Chart.defaults.color = cssv('--text-2');
 Chart.defaults.borderColor = cssv('--border');
 
-const state = {region:'', sen:'', ind:'', pill: CATS[0]};
+const state = {pill: CATS[0]};
 const uniq = a => [...new Set(a)].filter(Boolean);
 const pct = (n,t) => t ? (100*n/t).toFixed(1) : '0.0';
 const esc = s => (s==null?'':String(s)).replace(/[&<>"]/g, m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]));
 
-// ---- poblar filtros ----
-const ordSen = ['Direccion','Gerencia','Jefatura','Especialista','Analista','Asistente','Practicante','No especificado'];
-function fill(id, vals){
-  const s = document.getElementById(id);
-  vals.forEach(v=>{ const o=document.createElement('option'); o.value=v; o.textContent=v; s.appendChild(o); });
-}
-fill('f-region', ['Lima','Provincia','No especificado'].filter(r=>D.registros.some(x=>x.region===r)));
-fill('f-sen', ordSen.filter(s=>D.registros.some(x=>x.seniority===s)));
-const indCount = {}; D.registros.forEach(r=> indCount[r.industria]=(indCount[r.industria]||0)+1);
-fill('f-ind', Object.entries(indCount).sort((a,b)=>b[1]-a[1]).map(e=>e[0]));
-
-['f-region','f-sen','f-ind'].forEach(id=>
-  document.getElementById(id).addEventListener('change', ()=>{
-    state.region=document.getElementById('f-region').value;
-    state.sen=document.getElementById('f-sen').value;
-    state.ind=document.getElementById('f-ind').value;
-    render();
-  }));
-document.getElementById('f-reset').addEventListener('click', ()=>{
-  ['f-region','f-sen','f-ind'].forEach(id=>document.getElementById(id).value='');
-  state.region=state.sen=state.ind=''; render();
-});
-
-const filtrar = () => D.registros.filter(r =>
-  (!state.region || r.region===state.region) &&
-  (!state.sen || r.seniority===state.sen) &&
-  (!state.ind || r.industria===state.ind));
+// El reporte no filtra. Se probó con filtros por sector, seniority y región, y todos
+// degradaban la narrativa: los dos primeros vaciaban justo las secciones que comparan
+// ENTRE sectores y ENTRE niveles, y el de región resultaba engañoso porque 23.3% de los
+// avisos no declara ciudad — el corte "Lima" era en realidad "los que dijeron Lima".
+const filtrar = () => D.registros;
 
 // ---- helpers ----
 function conCat(recs,c){ return recs.filter(r=>r.cats.includes(c)); }
@@ -491,11 +572,8 @@ function upsert(id,cfg){ if(charts[id]) charts[id].destroy();
 // ================= RENDER =================
 function render(){
   const R = filtrar();
-  document.getElementById('nf').textContent = R.length;
-  document.getElementById('nf-low').innerHTML = R.length < N_MIN
-    ? `<span class="lowN">n&lt;30 · poco confiable</span>` : '';
   document.getElementById('hdr-n').textContent = D.total_con_ia;
-  s1(R); s2(R); s3(R); s4(R); s5(R); s6(R); s7(R); s8(R); s9(R);
+  s1(R); s2(R); s3(R); s4(R); s5(R); s6(R); s7(R); s8(R); s9(R); s10(R);
 }
 
 // ---- 1. tarjetas de categoría ----
@@ -545,7 +623,7 @@ function s3(R){
   // NO construye ni opera, así que su fila y columna serían ceros por construcción.
   const cs = CATS.slice(0,6).filter(c=>conCat(R,c).length>=8);
   document.getElementById('m-cooc').textContent =
-    `n = ${R.length} avisos · categorías con ≥8 avisos en el filtro actual · "Usar herramientas de IA" se excluye porque es excluyente con construir y operar por definición`;
+    `n = ${R.length} avisos · categorías con ≥8 avisos · "Usar herramientas de IA" se excluye porque es excluyente con construir y operar por definición`;
   let h = `<tr><th>De los que piden…</th>${cs.map(c=>`<th class="rot">…también piden ${esc(c.replace('IA para ','').replace(' IA',''))}</th>`).join('')}<th>n</th></tr>`;
   cs.forEach(c1=>{
     const A = conCat(R,c1);
@@ -575,7 +653,7 @@ function s3(R){
     <tr><th>Combinación de funciones</th><th style="text-align:right">Avisos</th><th style="text-align:right">%</th></tr>
     ${top.map(([k,v])=>`<tr><td>${esc(k)}</td><td style="text-align:right">${v}</td>
       <td style="text-align:right">${pct(v,R.length)}%</td></tr>`).join('')}</table>`
-    : '<p class="empty">Sin datos con estos filtros.</p>';
+    : '<p class="empty">Sin datos suficientes.</p>';
   document.getElementById('r-arq').innerHTML = top.length
     ? `La combinación más frecuente es <b>${esc(top[0][0])}</b> (${pct(top[0][1],R.length)}%). Que
        existan perfiles de una sola función indica que el mercado ya empezó a
@@ -590,9 +668,9 @@ function s4(R){
   const inds = Object.entries(byInd).filter(([,v])=>v.length>=8).sort((a,b)=>b[1].length-a[1].length);
   const cs = CATS.slice(0,6);
   document.getElementById('m-ind').textContent =
-    `n = ${R.length} avisos · sólo industrias con ≥8 avisos en el filtro actual; las de n<30 van marcadas`;
+    `n = ${R.length} avisos · sólo industrias con ≥8 avisos; las de n<30 van marcadas`;
   if(!inds.length){ document.getElementById('t-ind').innerHTML='';
-    document.getElementById('r-ind').textContent='Muestra insuficiente con estos filtros.'; return; }
+    document.getElementById('r-ind').textContent='Muestra insuficiente.'; return; }
   let h = `<tr><th>Industria</th><th>n</th>${cs.map(c=>`<th class="rot">${esc(c.replace('IA para ','').replace(' IA',''))}</th>`).join('')}</tr>`;
   inds.forEach(([ind,A])=>{
     h += `<tr><td class="lbl">${esc(ind)}${A.length<N_MIN?' <span class="lowN">n&lt;30</span>':''}</td>
@@ -632,7 +710,7 @@ function s5(R){
   const cont = document.getElementById('skills-list');
   document.getElementById('m-skills').innerHTML =
     `<b>${esc(c)}</b> — n = ${A.length} avisos${A.length<N_MIN?' <span class="lowN">n&lt;30 · poco confiable</span>':''} · % de esos avisos que piden cada habilidad`;
-  if(A.length < 3){ cont.innerHTML='<p class="empty">Muy pocos avisos con estos filtros.</p>';
+  if(A.length < 3){ cont.innerHTML='<p class="empty">Muy pocos avisos en esta categoría.</p>';
     document.getElementById('r-skills').textContent=''; return; }
   const f = freqSkills(A), top = topN(f,18), max = top.length? top[0][1] : 1;
   cont.innerHTML = top.map(([s,n])=>`
@@ -672,12 +750,12 @@ function s6(R){
     ${puente.map(x=>`<tr><td><b>${esc(x.s)}</b></td>
       <td style="text-align:center"><span class="tag">${x.k} de ${cs.length}</span></td>
       <td class="nsm">${esc(x.v.slice().sort((a,b)=>b.p-a.p)[0].c)} (${x.v.slice().sort((a,b)=>b.p-a.p)[0].p.toFixed(0)}%)</td></tr>`).join('')}
-    </table>` : '<p class="empty">Muestra insuficiente con estos filtros.</p>';
+    </table>` : '<p class="empty">Muestra insuficiente.</p>';
   document.getElementById('t-espec').innerHTML = espec.length ? `<table>
     <tr><th>Habilidad</th><th>Función que la pide</th><th style="text-align:right">%</th></tr>
     ${espec.map(x=>`<tr><td><b>${esc(x.s)}</b></td><td class="nsm">${esc(x.v[0].c)}</td>
       <td style="text-align:right">${x.v[0].p.toFixed(0)}%</td></tr>`).join('')}
-    </table>` : '<p class="empty">Muestra insuficiente con estos filtros.</p>';
+    </table>` : '<p class="empty">Muestra insuficiente.</p>';
   document.getElementById('r-puente').innerHTML = puente.length
     ? `<b>${esc(puente[0].s)}</b> aparece con fuerza en ${puente[0].k} de las ${cs.length} funciones
        analizadas: es la habilidad de mayor cobertura del mercado de IA peruano. La lectura práctica
@@ -695,7 +773,7 @@ function s7(R){
   document.getElementById('m-carr').textContent =
     `n = ${R.length} avisos · las 7 carreras más mencionadas; el color marca el peso relativo dentro de cada función`;
   if(!cs.length || !top.length){ document.getElementById('t-carr').innerHTML='';
-    document.getElementById('r-carr').textContent='Muestra insuficiente con estos filtros.'; return; }
+    document.getElementById('r-carr').textContent='Muestra insuficiente.'; return; }
   let h = `<tr><th>Función</th><th>n</th>${top.map(c=>`<th class="rot">${esc(c)}</th>`).join('')}</tr>`;
   const filas=[];
   cs.forEach(c=>{
@@ -726,8 +804,7 @@ function s7(R){
        <b>${esc(best.f)}</b>, frente a ${best.g.toFixed(0)}% en el promedio general
        (×${best.l.toFixed(1)}). La formación no es intercambiable entre funciones aunque el
        título del puesto se parezca.`
-    : `<b>${esc(dominante||'Ingeniería de Sistemas')}</b> domina en todas las funciones; con estos
-       filtros no hay suficientes menciones para señalar una carrera distintiva.`;
+    : `<b>${esc(dominante||'Ingeniería de Sistemas')}</b> domina en todas las funciones; no hay suficientes menciones para señalar una carrera distintiva.`;
 }
 
 // ---- 8. seniority ----
@@ -736,9 +813,9 @@ function s8(R){
   const orden = ['Practicante','Asistente','Analista','Especialista','Jefatura','Gerencia','Direccion'];
   const filas = orden.map(s=>({s, A:R.filter(r=>r.seniority===s)})).filter(x=>x.A.length>=5);
   document.getElementById('m-sen').textContent =
-    `n = ${R.length} avisos · sólo niveles con ≥5 avisos en el filtro actual; los de n<30 van marcados`;
+    `n = ${R.length} avisos · sólo niveles con ≥5 avisos; los de n<30 van marcados`;
   if(!filas.length){ document.getElementById('t-sen').innerHTML='';
-    document.getElementById('r-sen').textContent='Muestra insuficiente con estos filtros.'; return; }
+    document.getElementById('r-sen').textContent='Muestra insuficiente.'; return; }
   let h = `<tr><th>Nivel</th><th>n</th>${cs.map(c=>`<th class="rot">${esc(c.replace('IA para ','').replace(' IA',''))}</th>`).join('')}</tr>`;
   filas.forEach(({s,A})=>{
     h += `<tr><td class="lbl">${esc(s)}${A.length<N_MIN?' <span class="lowN">n&lt;30</span>':''}</td>
@@ -759,7 +836,102 @@ function s8(R){
   document.getElementById('r-sen').innerHTML = txt;
 }
 
-// ---- 9. la ruta de entrada, por escalón ----
+// ---- 9. estado de la adopción ----
+// Mezcla dos escalas y hay que ser explícito sobre cuál es cuál: la concentración y los
+// dominios se calculan sobre los avisos filtrados; el tipo de oferta viene del corpus
+// completo (544) y por eso no reacciona a los filtros.
+const IA_ESTRICTA_JS = ['Generative AI','AI Agents','Machine Learning','Deep Learning',
+                        'NLP','Computer Vision','MLOps'];
+
+function barrasSimples(filas, total, color){
+  if(!filas.length) return '<p class="empty">Sin datos suficientes.</p>';
+  const max = Math.max(...filas.map(f=>f[1])) || 1;
+  return filas.map(([k,v])=>`
+    <div class="skill-row" style="--cc:${color}">
+      <div class="nm" title="${esc(k)}">${esc(k)}</div>
+      <div class="skill-bar"><i style="width:${100*v/max}%"></i></div>
+      <div class="vl">${pct(v,total)}%</div>
+    </div>`).join('');
+}
+
+function s9(R){
+  const C = D.corpus || {};
+
+  // --- 9a. concentración: ¿muchas empresas con poco, o pocas con mucho? ---
+  const porEmpresa = {};
+  R.forEach(r=>{ if(r.empresa) porEmpresa[r.empresa]=(porEmpresa[r.empresa]||0)+1; });
+  const empresas = Object.entries(porEmpresa);
+  const nEmp = empresas.length;
+  const unaSola = empresas.filter(([,n])=>n===1).length;
+  const top = topN(porEmpresa, 5);
+  document.getElementById('m-ad1').textContent =
+    `n = ${R.length} avisos con IA · ${nEmp} empresas distintas`;
+  document.getElementById('ad-concentracion').innerHTML = nEmp ? `
+    <div class="skill-row" style="--cc:var(--c1)">
+      <div class="nm"><b>Con 1 solo aviso</b></div>
+      <div class="skill-bar"><i style="width:${100*unaSola/nEmp}%"></i></div>
+      <div class="vl">${pct(unaSola,nEmp)}%</div>
+    </div>
+    <p class="meta" style="margin:10px 0 6px">Las que más publican:</p>
+    ${barrasSimples(top, R.length, 'var(--c7)')}` : '<p class="empty">Sin datos.</p>';
+  document.getElementById('r-ad1').innerHTML = nEmp ? `
+    ${C.empresas ? `<b>${pct(C.empresas_con_ia, C.empresas)}% de las empresas del corpus</b>
+      (${C.empresas_con_ia} de ${C.empresas}) pide alguna habilidad de IA — no es un nicho
+      tecnológico. Pero ` : ''}<b>${pct(unaSola,nEmp)}% de ellas publica un solo aviso</b>. La lectura: no están armando equipos, están incorporando a su primera
+    persona de IA. Eso explica por qué se construye más de lo que se opera, y por qué casi no hay
+    puestos de entrada — cuando contratas a una sola persona, no contratas a un practicante.` : '';
+
+  // --- 9b. GenAI vs ML ---
+  const dom = {};
+  R.forEach(r=> (r.dominios||[]).forEach(d=> dom[d]=(dom[d]||0)+1));
+  const filas = IA_ESTRICTA_JS.map(d=>[d, dom[d]||0]).filter(f=>f[1]).sort((a,b)=>b[1]-a[1]);
+  document.getElementById('m-ad2').textContent = `n = ${R.length} avisos con IA · % que menciona cada dominio`;
+  document.getElementById('ad-dominios').innerHTML = barrasSimples(filas, R.length, 'var(--c1)');
+  const gen = dom['Generative AI']||0, ml = dom['Machine Learning']||0;
+  document.getElementById('r-ad2').innerHTML = (gen||ml) ? `
+    <b>Generative AI ${pct(gen,R.length)}%</b> frente a <b>Machine Learning ${pct(ml,R.length)}%</b>.
+    El machine learning lleva décadas en el mercado laboral; la IA generativa, unos pocos años.
+    Que estén tan parejos sugiere que <b>la ola actual de adopción la empuja la generativa</b>,
+    no la analítica predictiva de siempre.` : '';
+
+  // --- 9c. gobierno ejercido por quien construye ---
+  // Ojo con el denominador: todas estas cifras van sobre los avisos CON IA del filtro,
+  // no sobre el corpus completo. Mezclarlos invierte la conclusión.
+  const lideraArr = R.filter(r=>r.cats.includes('Liderar/gobernar IA'));
+  const lidera = lideraArr.length;
+  const lideraYconstruye = lideraArr.filter(r=>r.cats.includes('Construir IA')).length;
+  const senior = R.filter(r=>['Jefatura','Gerencia','Direccion'].includes(r.seniority)).length;
+  document.getElementById('m-ad3').textContent =
+    `n = ${R.length} avisos con IA · todas las cifras sobre esa misma base`;
+  document.getElementById('ad-gobierno').innerHTML = barrasSimples(
+    [['Piden gobernar IA', lidera],
+     ['…y además construyen', lideraYconstruye],
+     ['Avisos de jefatura o más', senior]],
+    R.length, 'var(--c5)');
+  document.getElementById('r-ad3').innerHTML = lidera ? `
+    <b>${pct(lidera,R.length)}%</b> de los avisos pide definir estrategia, estándares o gobierno de
+    IA — bastante para un mercado donde la mayoría de empresas recién contrata a su primera
+    persona. Pero <b>${pct(lideraYconstruye,lidera)}% de ellos también construye</b>: el gobierno
+    no está en manos de un gerente que sólo decide, sino de quien además tiene las manos en el
+    sistema. Ya aparecen cargos formales como “Subgerente de IA Generativa, Cumplimiento y Ética”
+    o “Head of AI”, pero son la excepción, no la norma.` : '';
+
+  // --- 9d. difusión: tipo de oferta sobre el corpus completo ---
+  const t = C.tipo_oferta || {};
+  const orden = ['Puesto de IA','Tradicional que pide IA','Datos sin IA','Sin IA ni datos'];
+  const fdif = orden.filter(k=>t[k]).map(k=>[k, t[k]]);
+  const totC = C.avisos || fdif.reduce((a,b)=>a+b[1],0);
+  document.getElementById('ad-difusion').innerHTML = barrasSimples(fdif, totC, 'var(--c3)');
+  const trad = t['Tradicional que pide IA']||0;
+  document.getElementById('r-ad4').innerHTML = trad ? `
+    <b>${pct(trad,totC)}% del corpus completo</b> son puestos que ya existían y ahora exigen IA:
+    Asistente Comercial, Analista de Gestión de Eventos, Practicante de People Analytics,
+    Analista de Procesos. La IA no está creando ni transformando esos puestos —
+    <b>se está añadiendo como requisito</b> a trabajos de siempre. Ese es el canal real por el
+    que la adopción se difunde fuera de los equipos técnicos.` : '';
+}
+
+// ---- 10. la ruta de entrada, por escalón ----
 // Los niveles se agrupan porque sueltos tienen n demasiado chico para leer nada.
 const ESCALONES = [
   {n:'Entrada · practicante y asistente', k:['Practicante','Asistente'],
@@ -774,7 +946,7 @@ const ESCALONES = [
 
 function freqDe(recs){ const m={}; recs.forEach(r=>r.skills.forEach(s=>m[s]=(m[s]||0)+1)); return m; }
 
-function s9(R){
+function s10(R){
   const grupos = ESCALONES.map(e=>({...e, A:R.filter(r=>e.k.includes(r.seniority))}));
   const cont = document.getElementById('ruta');
 
@@ -782,7 +954,7 @@ function s9(R){
     const A=g.A, color = CATS[i] ? COLOR(CATS[i]) : 'var(--accent)';
     if(!A.length) return `<div class="step" style="--cc:${color}">
       <div class="step-hd"><h3>${esc(g.n)}</h3></div>
-      <p class="empty">Sin avisos de este nivel con los filtros actuales.</p></div>`;
+      <p class="empty">Sin avisos de este nivel.</p></div>`;
 
     const f = freqDe(A), top = topN(f,8);
     const fn = CATS.map(c=>({c, n:A.filter(r=>r.cats.includes(c)).length}))
@@ -873,8 +1045,8 @@ function s9(R){
     qué función quieres ir.`);
 
   L.push(`<b>Y una advertencia sobre esta misma sección:</b> el escalón de entrada tiene
-    n=${gEnt.length} avisos. Es la base más chica de todo el reporte y la más sensible a los
-    filtros — léela como una orientación, no como una regla.`);
+    n=${gEnt.length} avisos. Es la base más chica de todo el reporte — léela como una
+    orientación, no como una regla.`);
 
   document.getElementById('lecciones').innerHTML = L.map(x=>`<li>${x}</li>`).join('');
 }
@@ -887,6 +1059,50 @@ if(window.matchMedia){
     Chart.defaults.borderColor = cssv('--border'); render(); };
   mq.addEventListener ? mq.addEventListener('change', onTheme) : mq.addListener(onTheme);
 }
+
+// ---- índice lateral ----
+// Se arma leyendo las secciones del DOM: así no hay una lista que mantener en paralelo
+// cada vez que se agrega, renumera o retitula una sección.
+(function indice(){
+  const nav = document.getElementById('toc');
+  const secs = [...document.querySelectorAll('section[id]')].map(sec=>{
+    const eyebrow = (sec.querySelector('.sec-num')?.textContent || '').trim();
+    const [num, ...resto] = eyebrow.split('·');
+    return {id: sec.id, num: (num||'').trim(), texto: resto.join('·').trim(), el: sec};
+  }).filter(x=>x.num);
+  if(!secs.length) return;
+
+  nav.innerHTML = secs.map(x=>
+    `<a href="#${x.id}" data-id="${x.id}"><i>${esc(x.num)}</i>${esc(x.texto)}</a>`
+  ).join('');
+  const enlaces = new Map([...nav.querySelectorAll('a')].map(a=>[a.dataset.id, a]));
+
+  const marcar = id => enlaces.forEach((a,k)=>{
+    const on = k===id;
+    a.classList.toggle('on', on);
+    if(on) a.setAttribute('aria-current','true'); else a.removeAttribute('aria-current');
+  });
+
+  // La sección activa es la última cuyo encabezado ya pasó la franja superior; con
+  // IntersectionObserver a secas, dos secciones visibles a la vez se pisan el estado.
+  const posicion = () => {
+    // Al final del documento el navegador ya no puede scrollear más, así que la última
+    // sección nunca cruzaría el umbral: si estamos tocando el fondo, es esa.
+    const fondo = window.innerHeight + window.scrollY >= document.body.offsetHeight - 4;
+    if(fondo){ marcar(secs[secs.length-1].id); return; }
+    const y = window.scrollY + 140;
+    let actual = secs[0];
+    for(const sc of secs){ if(sc.el.offsetTop <= y) actual = sc; }
+    marcar(actual.id);
+  };
+  let tick = false;
+  addEventListener('scroll', ()=>{
+    if(tick) return;
+    tick = true;
+    requestAnimationFrame(()=>{ posicion(); tick = false; });
+  }, {passive:true});
+  posicion();
+})();
 
 render();
 </script>
