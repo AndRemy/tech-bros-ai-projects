@@ -65,9 +65,11 @@ empleabilidad-ia/
 ├── analisis/    extracción con LLM, limpieza y clasificación
 │                  processor.py · manual_batch.py · dedup_contenido.py
 │                  consolidar_skills.py · nivel_desde_titulo.py · clasificar_ofertas.py
+│                  categorias_funcionales.py
 ├── reporte/     generación y salida del HTML
 │                  generar_reporte.py · plantilla.html · index.html
-├── datos/       exports intermedios (gitignored, ej. data.json)
+│                  generar_roles.py · plantilla_roles.html · roles.html
+├── datos/       exports intermedios (gitignored: data.json, roles.json)
 ├── docs/        arquitectura, pipeline, hallazgos, decisiones
 ├── .env         credenciales, nunca versionado
 └── README.md
@@ -161,24 +163,50 @@ python analisis/clasificar_ofertas.py --apply
 **Todos los scripts destructivos previsualizan por defecto** y requieren `--apply`
 para escribir. Los scrapers usan `--dry-run` para el comportamiento inverso.
 
-### 3. Reporte — generación del HTML (`reporte/`)
+### 3. Reportes — generación del HTML (`reporte/`)
 
 ```bash
-python reporte/generar_reporte.py
+python reporte/generar_reporte.py    # → reporte/index.html  (el mercado)
+python reporte/generar_roles.py      # → reporte/roles.html  (los roles)
 ```
 
-Consulta la BD, escribe el export intermedio en `datos/data.json` (gitignored)
-y regenera `reporte/index.html` inyectando ese JSON en `reporte/plantilla.html`.
-Correrlo de nuevo sobrescribe `index.html` con la data actual — no hace falta
-tocar el HTML a mano.
+Cada script consulta la BD, escribe su export intermedio en `datos/` (gitignored) e
+inyecta ese JSON en su plantilla:
 
-## Reporte
+| Script | Export | Plantilla | Salida |
+|---|---|---|---|
+| `generar_reporte.py` | `datos/data.json` | `plantilla.html` | `index.html` |
+| `generar_roles.py` | `datos/roles.json` | `plantilla_roles.html` | `roles.html` |
 
-[`reporte/index.html`](reporte/index.html) — reporte interactivo autocontenido
-(sin build step, gráficos con Chart.js vía CDN). Filtros por sector, región,
-seniority y periodo; vistas separadas "Para postulantes" y "Para reclutadores";
-cada gráfico declara qué mide, sobre cuántos avisos (n=X) y una lectura en una
-frase. Ábrelo directamente en el navegador, no necesita servidor.
+Son idempotentes: correrlos de nuevo sobrescribe el HTML con la data actual. **No edites
+los HTML de salida a mano** — el cambio se pierde en la siguiente corrida; edita la
+plantilla.
+
+`generar_roles.py` se apoya en [`analisis/categorias_funcionales.py`](analisis/categorias_funcionales.py),
+que clasifica cada aviso por lo que hace con la IA. Ese módulo también corre solo, para
+inspeccionar la clasificación sin generar el reporte:
+
+```bash
+python analisis/categorias_funcionales.py
+```
+
+## Reportes
+
+Dos reportes interactivos autocontenidos, sin build step y con Chart.js incrustado.
+Se abren directamente en el navegador, no necesitan servidor.
+
+**[`reporte/index.html`](reporte/index.html) — el mercado.** Filtros por sector, región,
+seniority y periodo; vistas separadas "Para postulantes" y "Para reclutadores"; cada
+gráfico declara qué mide, sobre cuántos avisos (n=X) y una lectura en una frase.
+
+**[`reporte/roles.html`](reporte/roles.html) — los roles.** Toma como eje qué significa
+*trabajar* en IA: siete categorías funcionales derivadas del texto de los avisos
+(construir, operar en producción, automatizar, analizar, liderar, programar con IA,
+usar herramientas), con las habilidades de cada una, la firma funcional de cada sector
+y una ruta de entrada por seniority. Base: los 317 avisos que exigen IA estricta.
+
+> Ambos reportes son foto de agosto de 2026. Para regenerarlos con la data actual de la
+> base, corre los scripts de la etapa 3 (más abajo) — no edites el HTML a mano.
 
 ## Documentación
 
@@ -193,10 +221,16 @@ frase. Ábrelo directamente en el navegador, no necesita servidor.
 
 **Qué está listo:** 544 ofertas peruanas extraídas y limpias, con integridad
 verificada (0 huérfanas, 0 duplicados, 0 nombres repetidos en el diccionario).
-Pipeline completo y re-ejecutable. Reporte interactivo publicado en
-[`reporte/index.html`](reporte/index.html).
+Pipeline completo y re-ejecutable. Dos reportes interactivos:
+[`reporte/index.html`](reporte/index.html) y [`reporte/roles.html`](reporte/roles.html).
 
 **Qué falta:** el post de LinkedIn.
+
+**Sobre la clasificación funcional de `roles.html`:** es una clasificación derivada del
+texto por reglas, con precisión estimada de ~75% sobre una muestra revisada a mano.
+Sirve para leer estructura, no para citar porcentajes al decimal, y **no se escribe a la
+base** — se calcula al generar el reporte. El módulo documenta su validación cruzada y
+los falsos positivos que se corrigieron.
 
 **Limitaciones honestas del dataset:**
 
