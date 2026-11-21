@@ -1,0 +1,6 @@
+[project]
+name = "evals"
+version = "0.1.0"
+description = "Template: eval harness for any AI app in this folder"
+requires-python = ">=3.10"
+dependencies = ["anthropic>=0.40", "python-dotenv>=1.0"]

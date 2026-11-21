@@ -1,0 +1,11 @@
+{
+  "name": "techbros-templates",
+  "owner": { "name": "TechBros" },
+  "plugins": [
+    {
+      "name": "notes-toolkit",
+      "source": "./",
+      "description": "Template plugin for learning the plugin structure."
+    }
+  ]
+}

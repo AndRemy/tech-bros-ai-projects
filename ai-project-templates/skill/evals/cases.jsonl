@@ -1,0 +1,3 @@
+{"prompt": "Here are my notes from today's standup, can you make minutes?", "should_trigger": true}
+{"prompt": "Summarize the action items from this transcript", "should_trigger": true}
+{"prompt": "Write a Python function to sort a list", "should_trigger": false}

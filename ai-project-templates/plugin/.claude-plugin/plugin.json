@@ -1,0 +1,6 @@
+{
+  "name": "notes-toolkit",
+  "version": "0.1.0",
+  "description": "Meeting-notes skill, analyst agent, /minutes command, logging hook and notes MCP server.",
+  "author": { "name": "TechBros" }
+}

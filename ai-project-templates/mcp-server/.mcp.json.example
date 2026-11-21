@@ -1,0 +1,9 @@
+{
+  "mcpServers": {
+    "notes": {
+      "command": "uv",
+      "args": ["run", "--directory", "/absolute/path/to/mcp-server", "notes-mcp"],
+      "env": { "NOTES_PATH": "/absolute/path/to/notes.json" }
+    }
+  }
+}

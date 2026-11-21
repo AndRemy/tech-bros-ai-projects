@@ -18,3 +18,10 @@ and installed independently of the rest of the portfolio.
   postings, structures them with an LLM into a skills taxonomy, and classifies
   each posting as an AI-native role, a traditional role that now requires AI, or
   neither. 544 postings, 269 companies.
+
+## Learning templates
+
+- [`ai-project-templates`](ai-project-templates/README.md) —
+  one starter project per kind of AI product (MCP server, Skill, Subagent,
+  Plugin, Agent SDK app, API tool-use app, RAG app, Evals). Each README covers
+  the structure, how to run it, and how it references the other types.

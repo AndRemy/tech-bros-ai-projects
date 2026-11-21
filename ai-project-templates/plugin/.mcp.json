@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "notes": {
+      "command": "uv",
+      "args": ["run", "--directory", "${CLAUDE_PLUGIN_ROOT}/servers/notes-mcp", "notes-mcp"]
+    }
+  }
+}
